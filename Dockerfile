@@ -2,9 +2,8 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Set timezone to Australia/Sydney
-ENV TZ=Australia/Sydney
-RUN apk add --no-cache tzdata
+# Install bash for devcontainer features
+RUN apk add --no-cache bash
 
 # Copy package files
 COPY package*.json ./

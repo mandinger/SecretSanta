@@ -1,36 +1,53 @@
 # Secret Santa Web App
 
-A festive Secret Santa party organizer with Christmas theme and snow animations.
-
-## Preview
-
-![Secret Santa App Screenshot](public/screenshot.png)
+A secure Secret Santa room organizer with end-to-end encryption, user authentication, and festive Christmas theme.
 
 ## Features
 
-- Create Secret Santa parties with custom rules
-- Automatic random assignment with no double-ups
-- Set budget limits and gift criteria
-- Secure unique guest links (no snooping!)
-- Beautiful Christmas theme with snow animations
-- Docker deployment ready
+- **Room-Based System:** Host creates a room with username/password authentication
+- **Participant Registration:** Users register with their own username/password
+- **Host Management:** View and manage participants before starting the room
+- **E2E Encryption:** Assignments are encrypted client-side using CryptoJS AES
+- **Auto-Login:** Host credentials saved in sessionStorage for seamless experience
+- **Secure Authentication:** Passwords hashed with SHA-256, assignments encrypted per-user
+- **Beautiful UI:** Christmas theme with snow animations and responsive design
+- **Data Persistence:** Room data persists in Docker volumes across container rebuilds
 
-## Configuration
+## How It Works
 
-Create a `.env` file with your settings:
+1. **Host Creates Room:**
+   - Visit the main page
+   - Enter room name, your username, and password
+   - Optionally auto-join to skip re-entering credentials
 
-```env
-# Server port (default: 8003)
-PORT=8003
+2. **Participants Register:**
+   - Share the room URL with participants
+   - Each participant creates their own username/password
+   - Host can view and manage registered participants
 
-# Base URL for generating guest links
-# For local development:
-BASE_URL=http://localhost:8003
-# For production deployment:
-BASE_URL=https://your-domain.com
-```
+3. **Host Starts Room:**
+   - Once everyone is registered (minimum 2 participants)
+   - Host clicks "Start Secret Santa Room"
+   - Assignments are generated and encrypted client-side
 
-**Important:** Set `BASE_URL` to your production domain when deploying, as this URL is used to generate the guest invitation links.
+4. **View Assignments:**
+   - Participants sign in with their credentials
+   - Their assignment is decrypted using their username+roomId as key
+   - Completely secure - only the user can decrypt their own assignment
+
+## Quick Start with Dev Container
+
+1. **Open in VS Code:**
+   - Install the "Dev Containers" extension
+   - Open the folder and click "Reopen in Container"
+   - All dependencies install automatically
+
+2. **Run the server:**
+   - Press F5 to start debugging, or
+   - Run `npm start` in the terminal
+
+3. **Access the app:**
+   - Local URL: `http://localhost:8003`
 
 ## Quick Start with Docker
 
@@ -59,47 +76,58 @@ BASE_URL=https://your-domain.com
    npm run dev
    ```
 
-## Usage
+## API Endpoints
 
-1. **Create a Party:**
-   - Visit the main page
-   - Enter party name, budget (optional), and criteria (optional)
-   - Add guest names (minimum 2, include yourself if participating!)
-   - Click "Create Secret Santa Party"
-
-2. **Share with Guests:**
-   - Copy the individual personal links for each guest
-   - Each person gets their own unique link
-   - The party creator uses their personal link just like everyone else
-
-3. **Guest Participation:**
-   - Each person visits their unique personal link
-   - They immediately see who they're buying a gift for
-   - Assignments are kept secret and secure!
+- `POST /api/rooms` - Create a new room
+- `GET /api/rooms/:id` - Get room details (public info)
+- `POST /api/rooms/:id/register` - Register as a participant
+- `POST /api/rooms/:id/host-auth` - Authenticate as host
+- `POST /api/rooms/:id/remove-participant` - Remove a participant (host only)
+- `POST /api/rooms/:id/start` - Start the room and lock assignments (host only)
+- `POST /api/rooms/:id/login` - Login as participant to view assignment
+- `GET /room/:id` - Room page (serves room.html)
 
 ## Technology Stack
 
-- **Backend:** Node.js with Express
+- **Backend:** Node.js 18 with Express
+- **Security:** 
+  - SHA-256 password hashing (Node.js crypto module)
+  - AES encryption (CryptoJS 4.1.1 client-side)
 - **Frontend:** HTML5, CSS3, JavaScript, Tailwind CSS
-- **Styling:** Christmas theme with custom animations
+- **Styling:** Christmas theme with custom animations and snowflakes
+- **Development:** VS Code Dev Containers with Git support
 - **Deployment:** Docker & Docker Compose
-- **Data Storage:** In-memory (for demo purposes)
+- **Data Storage:** JSON file persistence with volume mounts
 
-## Docker Deployment
+## Security Features
 
-The app is configured to run on `0.0.0.0:8003` using Docker:
+- **Password Hashing:** All passwords hashed with SHA-256 before storage
+- **Host Verification:** Host password combined with username for authentication
+- **E2E Encryption:** Assignments encrypted client-side, server never sees plaintext
+- **Unique Keys:** Each user's assignment encrypted with `username + roomId`
+- **No URL Parameters:** Authentication state stored client-side (sessionStorage)
+- **Rate Limiting:** Built-in rate limiting to prevent brute force attacks
 
-- **Port:** 8003
-- **Container Name:** secret-santa-app
-- **Restart Policy:** unless-stopped
+## Development
 
-**For Production:** Update the `BASE_URL` environment variable in `docker-compose.yml` to your actual domain before deploying.
+**VS Code Debugging:**
+- Press F5 to launch the debugger
+- Two configurations available:
+  - "Launch Server" - Start server.js directly
+  - "Attach to Process" - Attach to running Node process
+
+**Dev Container Setup:**
+- Workspace folder mounted as bind volume (changes persist)
+- Data folder uses named volume (survives rebuilds)
+- Git and SSH keys automatically mounted
+- All dependencies installed via `postCreateCommand`
 
 ## Notes
 
-- Uses file-based storage with automatic backups
-- Parties and assignments persist between server restarts
-- The assignment algorithm ensures no one gets themselves
-- All assignments are generated once per party and saved
+- Room data stored in `/app/data/rooms.json`
+- Fisher-Yates shuffle ensures random, fair assignments
+- Assignment algorithm guarantees no one gets themselves
+- Participants can view participant list before room starts (auto-refresh every 5s)
+- Host can remove participants until room is started
 
 ## Merry Christmas! 🎅🎄❄️

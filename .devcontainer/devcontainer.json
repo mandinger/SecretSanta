@@ -1,0 +1,27 @@
+{
+	"name": "Node.js",
+	"build": {
+		"dockerfile": "../Dockerfile",
+		"context": ".."
+	},
+	"workspaceFolder": "/app",
+	"mounts": [
+		"source=${localWorkspaceFolder},target=/app,type=bind,consistency=cached",
+		"source=secret-santa-data,target=/app/data,type=volume"
+	],
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	},
+	"forwardPorts": [
+		8003
+	],
+	"postCreateCommand": "npm install"
+}

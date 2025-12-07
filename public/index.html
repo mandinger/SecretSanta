@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secret Santa Party Creator</title>
+    <title>Secret Santa - Create Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&display=swap');
@@ -90,57 +90,82 @@
     <div class="content min-h-screen flex items-center justify-center p-4">
         <div class="christmas-card rounded-xl p-8 max-w-2xl w-full">
             <div class="text-center mb-8">
-                <h1 class="christmas-font text-6xl text-red-700 mb-4">Secret Santa</h1>
-                <p class="text-gray-600 text-lg">Create your magical Christmas gift exchange!</p>
+                <h1 class="christmas-font text-6xl text-red-700 mb-4">🎅 Secret Santa 🎄</h1>
+                <p class="text-gray-600 text-lg">Create a secure room for your gift exchange!</p>
             </div>
             
-            <form id="partyForm" class="space-y-6">
+            <form id="roomForm" class="space-y-6">
                 <div>
-                    <label class="block text-gray-700 font-bold mb-2">Party Name</label>
-                    <input type="text" id="partyName" required 
+                    <label class="block text-gray-700 font-bold mb-2">Room Name</label>
+                    <input type="text" id="roomName" required 
                            class="input-christmas w-full" 
                            placeholder="e.g., Office Christmas Party 2024">
                 </div>
                 
-                <div>
-                    <label class="block text-gray-700 font-bold mb-2">Budget (Optional)</label>
-                    <input type="text" id="budget" 
-                           class="input-christmas w-full" 
-                           placeholder="e.g., $25 per gift">
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-bold mb-2">Additional Criteria (Optional)</label>
-                    <textarea id="criteria" rows="3" 
-                              class="input-christmas w-full" 
-                              placeholder="e.g., No gift cards, handmade items preferred, etc."></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-bold mb-2">
-                        Guest Names (one per line, minimum 2 guests)
-                        <span class="text-sm font-normal text-gray-600">Include yourself if you're participating!</span>
-                    </label>
-                    <textarea id="guests" required rows="6" 
-                              class="input-christmas w-full" 
-                              placeholder="John Smith&#10;Jane Doe&#10;Bob Wilson&#10;Alice Brown&#10;(Include yourself here if participating)"></textarea>
+                <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+                    <h3 class="font-bold text-blue-800 mb-3">🔐 Host Account</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">Your Username</label>
+                            <input type="text" id="hostUsername" required 
+                                   class="input-christmas w-full" 
+                                   placeholder="Your name">
+                            <p class="text-xs text-gray-600 mt-1">This is your username to manage the room</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2">Host Password</label>
+                            <input type="password" id="hostPassword" required minlength="4"
+                                   class="input-christmas w-full" 
+                                   placeholder="Choose a secure password">
+                            <p class="text-xs text-gray-600 mt-1">You'll use this to manage participants and start the room</p>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="autoJoinHost" checked
+                                   class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                            <label for="autoJoinHost" class="ml-2 text-gray-700">
+                                Participate in the Secret Santa exchange
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 
                 <button type="submit" class="btn-christmas w-full text-lg">
-                    🎅 Create Secret Santa Party 🎄
+                    🎁 Create Room
                 </button>
             </form>
             
             <div id="result" class="hidden mt-8 p-6 bg-green-50 border-2 border-green-300 rounded-lg">
-                <h3 class="text-xl font-bold text-green-800 mb-4">🎉 Party Created Successfully!</h3>
-                <p class="text-green-700 mb-4">Share the individual guest links below with each person. Each link is personal and will show them their Secret Santa assignment!</p>
-                <div class="space-y-4">
-                    <div>
-                        <strong class="text-gray-700">Individual Guest Links:</strong>
-                        <div id="guestLinks" class="space-y-2">
-                            <!-- Guest links will be populated here -->
-                        </div>
+                <h3 class="text-xl font-bold text-green-800 mb-4">🎉 Room Created Successfully!</h3>
+                <p class="text-green-700 mb-4">Share this link with participants so they can register:</p>
+                
+                <div class="bg-white p-4 rounded-lg border-2 border-green-400 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <strong class="text-gray-700">Room Link:</strong>
+                        <button onclick="copyRoomLink()" type="button" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600" id="copyBtn">
+                            📋 Copy Link
+                        </button>
                     </div>
+                    <input type="text" id="roomUrl" readonly class="w-full bg-gray-100 p-2 rounded text-sm">
+                </div>
+                
+                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+                    <h4 class="font-bold text-yellow-800 mb-2">⚡ Next Steps:</h4>
+                    <ol class="list-decimal list-inside space-y-1 text-yellow-900 text-sm">
+                        <li>Share the room link with your participants</li>
+                        <li>Each person creates a username + password</li>
+                        <li>As host, you can view and manage participants</li>
+                        <li>When ready, click "Start Room" to generate assignments</li>
+                        <li>Participants sign in to see who they're buying for!</li>
+                    </ol>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <a id="goToRoom" href="#" class="btn-christmas inline-block">
+                        🚀 Go to Room Management
+                    </a>
                 </div>
             </div>
         </div>
@@ -168,68 +193,53 @@
         createSnowflakes();
         
         // Form submission
-        document.getElementById('partyForm').addEventListener('submit', async (e) => {
+        document.getElementById('roomForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const partyName = document.getElementById('partyName').value;
-            const budget = document.getElementById('budget').value;
-            const criteria = document.getElementById('criteria').value;
-            const guestsText = document.getElementById('guests').value;
-            const guests = guestsText.split('\n').filter(g => g.trim()).map(g => g.trim());
-            
-            if (guests.length < 2) {
-                alert('Please add at least 2 guests!');
-                return;
-            }
+            const roomName = document.getElementById('roomName').value;
+            const hostUsername = document.getElementById('hostUsername').value;
+            const hostPassword = document.getElementById('hostPassword').value;
+            const autoJoinHost = document.getElementById('autoJoinHost').checked;
             
             try {
-                const response = await fetch('/api/parties', {
+                const response = await fetch('/api/rooms', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        name: partyName,
-                        budget,
-                        criteria,
-                        guests
+                        name: roomName,
+                        hostUsername,
+                        hostPassword,
+                        autoJoinHost
                     })
                 });
                 
                 const data = await response.json();
                 
                 if (response.ok) {
-                    // Populate guest links
-                    const guestLinksDiv = document.getElementById('guestLinks');
-                    guestLinksDiv.innerHTML = '';
-                    
-                    Object.entries(data.guestUrls).forEach(([guest, url]) => {
-                        const guestDiv = document.createElement('div');
-                        guestDiv.className = 'p-3 bg-white border border-gray-300 rounded';
-                        guestDiv.innerHTML = `
-                            <div class="flex items-center justify-between">
-                                <strong class="text-gray-700">${guest}:</strong>
-                                <button onclick="copyGuestLink('${url}', this)" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600">
-                                    📋 Copy
-                                </button>
-                            </div>
-                            <input type="text" value="${url}" readonly class="w-full bg-transparent text-sm text-gray-600 mt-1">
-                        `;
-                        guestLinksDiv.appendChild(guestDiv);
-                    });
-                    
+                    // Show success message
+                    document.getElementById('roomUrl').value = data.roomUrl;
+                    document.getElementById('goToRoom').href = `/room/${data.roomId}`;
                     document.getElementById('result').classList.remove('hidden');
                     document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Save host credentials temporarily for auto-login
+                    sessionStorage.setItem(`hostUser_${data.roomId}`, hostUsername);
+                    sessionStorage.setItem(`hostPass_${data.roomId}`, hostPassword);
                 } else {
                     alert('Error: ' + data.error);
                 }
             } catch (error) {
-                alert('Error creating party: ' + error.message);
+                alert('Error creating room: ' + error.message);
             }
         });
         
-        function copyGuestLink(url, button) {
-            navigator.clipboard.writeText(url).then(() => {
+        function copyRoomLink() {
+            const roomUrl = document.getElementById('roomUrl').value;
+            const button = document.getElementById('copyBtn');
+            
+            navigator.clipboard.writeText(roomUrl).then(() => {
                 const originalText = button.textContent;
                 button.textContent = '✅ Copied!';
                 button.classList.add('bg-green-500');
