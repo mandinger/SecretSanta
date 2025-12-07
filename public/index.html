@@ -5,102 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Santa - Create Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&display=swap');
-        
-        .christmas-font {
-            font-family: 'Mountains of Christmas', cursive;
-        }
-        
-        .snow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .snowflake {
-            position: absolute;
-            top: -10px;
-            color: white;
-            user-select: none;
-            animation: fall linear infinite;
-        }
-        
-        @keyframes fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-            }
-        }
-        
-        .content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f4c75 0%, #1e3a5f 50%, #0f4c75 100%);
-            min-height: 100vh;
-        }
-        
-        .christmas-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 3px solid #c41e3a;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn-christmas {
-            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
-            color: white;
-            padding: 12px 24px;
-            border: 2px solid #8b0000;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-christmas:hover {
-            background: linear-gradient(135deg, #8b0000 0%, #c41e3a 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(196, 30, 58, 0.3);
-        }
-        
-        .input-christmas {
-            border: 2px solid #c41e3a;
-            border-radius: 8px;
-            padding: 10px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .input-christmas:focus {
-            border-color: #8b0000;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-        }
-    </style>
+    <link rel="stylesheet" href="shared-styles.css">
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
     <div class="snow" id="snow"></div>
     
     <div class="content min-h-screen flex items-center justify-center p-4">
-        <div class="christmas-card rounded-xl p-8 max-w-2xl w-full">
+        <div class="christmas-card p-8 max-w-2xl w-full">
+            <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="christmas-font text-6xl text-red-700 mb-4">🎅 Secret Santa 🎄</h1>
                 <p class="text-gray-600 text-lg">Create a secure room for your gift exchange!</p>
             </div>
             
+            <!-- Creation Form -->
             <form id="roomForm" class="space-y-6">
                 <div>
                     <label class="block text-gray-700 font-bold mb-2">Room Name</label>
-                    <input type="text" id="roomName" required 
-                           class="input-christmas w-full" 
+                    <input type="text" id="roomName" required class="input-christmas" 
                            placeholder="e.g., Office Christmas Party 2024">
                 </div>
                 
@@ -110,23 +32,20 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-gray-700 font-bold mb-2">Your Username</label>
-                            <input type="text" id="hostUsername" required 
-                                   class="input-christmas w-full" 
+                            <input type="text" id="hostUsername" required class="input-christmas" 
                                    placeholder="Your name">
-                            <p class="text-xs text-gray-600 mt-1">This is your username to manage the room</p>
+                            <p class="text-xs text-gray-600 mt-1">You'll use this to manage the room</p>
                         </div>
                         
                         <div>
                             <label class="block text-gray-700 font-bold mb-2">Host Password</label>
-                            <input type="password" id="hostPassword" required minlength="4"
-                                   class="input-christmas w-full" 
+                            <input type="password" id="hostPassword" required minlength="4" class="input-christmas" 
                                    placeholder="Choose a secure password">
-                            <p class="text-xs text-gray-600 mt-1">You'll use this to manage participants and start the room</p>
+                            <p class="text-xs text-gray-600 mt-1">For managing participants and starting the room</p>
                         </div>
                         
                         <div class="flex items-center">
-                            <input type="checkbox" id="autoJoinHost" checked
-                                   class="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                            <input type="checkbox" id="autoJoinHost" checked class="w-4 h-4 text-red-600">
                             <label for="autoJoinHost" class="ml-2 text-gray-700">
                                 Participate in the Secret Santa exchange
                             </label>
@@ -134,89 +53,37 @@
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-christmas w-full text-lg">
-                    🎁 Create Room
-                </button>
+                <button type="submit" class="btn-christmas w-full text-lg">🎁 Create Room</button>
             </form>
             
-            <div id="result" class="hidden mt-8 p-6 bg-green-50 border-2 border-green-300 rounded-lg">
-                <h3 class="text-xl font-bold text-green-800 mb-4">🎉 Room Created Successfully!</h3>
-                <p class="text-green-700 mb-4">Share this link with participants so they can register:</p>
-                
-                <div class="bg-white p-4 rounded-lg border-2 border-green-400 mb-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <strong class="text-gray-700">Room Link:</strong>
-                        <button onclick="copyRoomLink()" type="button" class="px-3 py-1 bg-blue-500 text-white rounded text-sm hover:bg-blue-600" id="copyBtn">
+            <!-- Success Message -->
+            <div id="result" class="hidden mt-8 space-y-4">
+                <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6 text-center">
+                    <h3 class="text-2xl font-bold text-green-800 mb-3">🎉 Room Created!</h3>
+                    <p class="text-green-700 mb-4">Share this link with your participants:</p>
+                    
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="roomUrl" readonly class="input-christmas flex-1 text-sm">
+                        <button onclick="copyLink()" type="button" class="btn-christmas" id="copyBtn">
                             📋 Copy Link
                         </button>
                     </div>
-                    <input type="text" id="roomUrl" readonly class="w-full bg-gray-100 p-2 rounded text-sm">
                 </div>
                 
-                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
-                    <h4 class="font-bold text-yellow-800 mb-2">⚡ Next Steps:</h4>
-                    <ol class="list-decimal list-inside space-y-1 text-yellow-900 text-sm">
-                        <li>Share the room link with your participants</li>
-                        <li>Each person creates a username + password</li>
-                        <li>As host, you can view and manage participants</li>
-                        <li>When ready, click "Start Room" to generate assignments</li>
-                        <li>Participants sign in to see who they're buying for!</li>
-                    </ol>
-                </div>
-                
-                <div class="mt-4 text-center">
-                    <a id="goToRoom" href="#" class="btn-christmas inline-block">
-                        🚀 Go to Room Management
-                    </a>
-                </div>
+                <a id="goToRoom" href="#" class="btn-christmas block text-center text-lg">
+                    🚀 Go to Room
+                </a>
             </div>
         </div>
     </div>
 
+    <!-- Crypto Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+    <script src="shared-utils.js"></script>
+    
     <script>
-        // Create snowflakes
-        function createSnowflakes() {
-            const snow = document.getElementById('snow');
-            const snowflakeSymbols = ['❄', '❅', '❆'];
-            
-            for (let i = 0; i < 50; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                snowflake.innerHTML = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
-                snowflake.style.left = Math.random() * 100 + '%';
-                snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
-                snowflake.style.opacity = Math.random();
-                snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
-                snowflake.style.animationDelay = Math.random() * 2 + 's';
-                snow.appendChild(snowflake);
-            }
-        }
-        
-        createSnowflakes();
-        
-        // Derive deterministic RSA key pair from password (same as room.html)
-        function deriveKeyPairFromPassword(username, password, roomId, keySalt) {
-            const seed = username + password + roomId;
-            const keyMaterial = CryptoJS.PBKDF2(seed, keySalt, {
-                keySize: 512/32,
-                iterations: 100000  // Increased from 1000 for security
-            }).toString();
-            const seedBytes = forge.util.hexToBytes(keyMaterial);
-            const prng = forge.random.createInstance();
-            prng.seedFileSync = () => seedBytes;
-            const keypair = forge.pki.rsa.generateKeyPair({
-                bits: 2048,
-                prng: prng,
-                workers: 0
-            });
-            return keypair;
-        }
-        
-        function exportPublicKey(publicKey) {
-            return forge.pki.publicKeyToPem(publicKey);
-        }
-        
-        // Form submission
+        // Form submission handler
         document.getElementById('roomForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -227,24 +94,12 @@
             const submitButton = e.target.querySelector('button[type="submit"]');
             
             try {
-                submitButton.disabled = true;
+                setButtonState(submitButton, 'Creating room...', true);
                 
-                let hostPublicKey = null;
-                
-                // Generate public key if auto-joining
-                if (autoJoinHost) {
-                    submitButton.textContent = 'Generating encryption keys...';
-                    // We need the roomId first, so we'll generate a temporary one
-                    // Actually, we need to create room first, then register. Let's change approach.
-                }
-                
-                submitButton.textContent = 'Creating room...';
-                
+                // Create room
                 const response = await fetch('/api/rooms', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: roomName,
                         hostUsername,
@@ -254,79 +109,37 @@
                 });
                 
                 const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
                 
-                if (response.ok) {
-                    const roomId = data.roomId;
-                    
-                    // If auto-join was checked, register the host
-                    if (autoJoinHost) {
-                        submitButton.textContent = '📡 Requesting encryption parameters...';
-                        
-                        // Step 1: Get keySalt from server
-                        const initResponse = await fetch(`/api/rooms/${roomId}/init-register`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                username: hostUsername,
-                                password: hostPassword
-                            })
-                        });
-                        
-                        if (!initResponse.ok) {
-                            const initError = await initResponse.json();
-                            alert('Room created but failed to initialize registration: ' + initError.error);
-                        } else {
-                            const initData = await initResponse.json();
-                            const keySalt = initData.keySalt;
-                            
-                            submitButton.textContent = '🔐 Generating encryption keys...';
-                            
-                            // Use setTimeout to allow UI to update
-                            await new Promise(resolve => setTimeout(resolve, 100));
-                            
-                            submitButton.textContent = '⚙️ Deriving cryptographic keys (this may take 10-15 seconds)...';
-                            
-                            // Step 2: Generate RSA keypair with keySalt from server
-                            const keypair = deriveKeyPairFromPassword(hostUsername, hostPassword, roomId, keySalt);
-                            const publicKeyPem = exportPublicKey(keypair.publicKey);
-                            
-                            submitButton.textContent = '📝 Completing registration...';
-                            
-                            // Step 3: Complete registration with real public key and keySalt
-                            await fetch(`/api/rooms/${roomId}/register`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    username: hostUsername,
-                                    password: hostPassword,
-                                    publicKey: publicKeyPem,
-                                    keySalt: keySalt
-                                })
-                            });
-                        }
-                    }
-                    
-                    // Show success message
-                    document.getElementById('roomUrl').value = data.roomUrl;
-                    document.getElementById('goToRoom').href = `/room/${roomId}`;
-                    document.getElementById('result').classList.remove('hidden');
-                    document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
-                    
-                    // Save host credentials temporarily for auto-login
-                    sessionStorage.setItem(`hostUser_${roomId}`, hostUsername);
-                    sessionStorage.setItem(`hostPass_${roomId}`, hostPassword);
-                } else {
-                    alert('Error: ' + data.error);
+                const roomId = data.roomId;
+                
+                // Auto-join host if checked
+                if (autoJoinHost) {
+                    await registerUser(roomId, hostUsername, hostPassword, submitButton);
                 }
+                
+                // Store credentials for auto-login
+                sessionStorage.setItem(`hostUser_${roomId}`, hostUsername);
+                sessionStorage.setItem(`hostPass_${roomId}`, hostPassword);
+                
+                // Show success
+                document.getElementById('roomUrl').value = data.roomUrl;
+                document.getElementById('goToRoom').href = `/room/${roomId}`;
+                document.getElementById('result').classList.remove('hidden');
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
             } catch (error) {
-                alert('Error creating room: ' + error.message);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg text-center';
+                errorDiv.innerHTML = `<p class="text-red-800 font-bold">❌ Error</p><p class="text-red-600">${error.message}</p>`;
+                document.getElementById('roomForm').appendChild(errorDiv);
+                setTimeout(() => errorDiv.remove(), 5000);
             } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = '🎁 Create Room';
+                setButtonState(submitButton, '🎁 Create Room', false);
             }
         });
         
-        function copyRoomLink() {
+        // Copy link to clipboard
+        function copyLink() {
             const roomUrl = document.getElementById('roomUrl').value;
             const button = document.getElementById('copyBtn');
             

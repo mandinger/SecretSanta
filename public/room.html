@@ -5,273 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Secret Santa Room</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mountains+of+Christmas&display=swap');
-        
-        .christmas-font {
-            font-family: 'Mountains of Christmas', cursive;
-        }
-        
-        .snow {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 1;
-        }
-        
-        .snowflake {
-            position: absolute;
-            top: -10px;
-            color: white;
-            user-select: none;
-            animation: fall linear infinite;
-        }
-        
-        @keyframes fall {
-            to {
-                transform: translateY(100vh) rotate(360deg);
-            }
-        }
-        
-        .content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f4c75 0%, #1e3a5f 50%, #0f4c75 100%);
-            min-height: 100vh;
-        }
-        
-        .christmas-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 3px solid #c41e3a;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .btn-christmas {
-            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
-            color: white;
-            padding: 12px 24px;
-            border: 2px solid #8b0000;
-            border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-christmas:hover:not(:disabled) {
-            background: linear-gradient(135deg, #8b0000 0%, #c41e3a 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(196, 30, 58, 0.3);
-        }
-        
-        .btn-christmas:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .input-christmas {
-            border: 2px solid #c41e3a;
-            border-radius: 8px;
-            padding: 10px;
-            transition: border-color 0.3s ease;
-        }
-        
-        .input-christmas:focus {
-            border-color: #8b0000;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(196, 30, 58, 0.1);
-        }
-        
-        .reveal-animation {
-            animation: revealGift 0.8s ease-out;
-        }
-        
-        @keyframes revealGift {
-            0% {
-                transform: scale(0) rotate(0deg);
-                opacity: 0;
-            }
-            50% {
-                transform: scale(1.2) rotate(180deg);
-            }
-            100% {
-                transform: scale(1) rotate(360deg);
-                opacity: 1;
-            }
-        }
-        
-        .spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .progress-bar {
-            height: 4px;
-            background: linear-gradient(90deg, #c41e3a, #8b0000);
-            border-radius: 2px;
-            animation: progressPulse 2s ease-in-out infinite;
-            margin-top: 8px;
-        }
-        
-        @keyframes progressPulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 1; }
-        }
-    </style>
+    <link rel="stylesheet" href="/shared-styles.css">
 </head>
 <body>
     <div class="snow" id="snow"></div>
     
     <div class="content min-h-screen flex items-center justify-center p-4">
-        <div class="christmas-card rounded-xl p-8 max-w-4xl w-full">
+        <div class="christmas-card p-8 max-w-4xl w-full">
+            <!-- Header -->
             <div class="text-center mb-8">
                 <h1 class="christmas-font text-5xl text-red-700 mb-2">🎅 Secret Santa 🎄</h1>
                 <h2 id="roomNameDisplay" class="text-2xl text-gray-700 font-bold"></h2>
             </div>
             
-            <!-- Participant Registration View -->
+            <!-- Registration View -->
             <div id="registerView" class="hidden">
                 <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
-                    <h3 class="font-bold text-blue-800 mb-2">🎁 Join the Secret Santa!</h3>
-                    <p class="text-gray-700 mb-4">Create your account to participate. You'll use these credentials to sign in later and see your assignment.</p>
+                    <h3 class="font-bold text-blue-800 mb-2">🎁 Join or Access the Secret Santa!</h3>
+                    <p class="text-gray-700">
+                        <strong>New participant?</strong> Create your account below to join.<br>
+                        <strong>Already registered?</strong> Enter your credentials to access the room.
+                    </p>
                 </div>
                 
                 <form id="registerForm" class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Choose a Username</label>
-                        <input type="text" id="regUsername" required 
-                               class="input-christmas w-full" 
-                               placeholder="Your name">
+                        <label class="block text-gray-700 font-bold mb-2">Username</label>
+                        <input type="text" id="regUsername" required class="input-christmas" placeholder="Your name">
                     </div>
-                    
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Choose a Password</label>
-                        <input type="password" id="regPassword" required minlength="4"
-                               class="input-christmas w-full" 
-                               placeholder="Create a password">
-                        <p class="text-xs text-gray-600 mt-1">⚠️ Remember this! You'll need it to view your assignment.</p>
+                        <label class="block text-gray-700 font-bold mb-2">Password</label>
+                        <input type="password" id="regPassword" required minlength="4" class="input-christmas" placeholder="Your password">
+                        <p class="text-xs text-gray-600 mt-1">⚠️ New users: Choose a password you'll remember. Existing users: Enter your password.</p>
                     </div>
-                    
-                    <button type="submit" class="btn-christmas w-full">
-                        ✨ Register & Join
-                    </button>
+                    <button type="submit" class="btn-christmas w-full">✨ Continue</button>
                 </form>
                 
                 <div id="registerSuccess" class="hidden mt-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
                     <h4 class="font-bold text-green-800 mb-2">✅ Registration Successful!</h4>
-                    <p class="text-green-700">You're now registered for this Secret Santa. Come back once the host starts the room to see your assignment!</p>
+                    <p class="text-green-700">Wait for the host to start the room, then sign in to see your assignment!</p>
                 </div>
             </div>
             
             <!-- Host Management View -->
             <div id="hostView" class="hidden">
+                <!-- Host Auth Form -->
                 <div id="hostAuthForm" class="mb-6">
                     <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
                         <h3 class="font-bold text-yellow-800 mb-2">🔑 Host Sign In</h3>
-                        <p class="text-gray-700">Sign in with your host credentials to manage this room.</p>
+                        <p class="text-gray-700">Sign in to manage this room.</p>
                     </div>
                     
                     <form id="hostLoginForm" class="space-y-4">
                         <div>
                             <label class="block text-gray-700 font-bold mb-2">Username</label>
-                            <input type="text" id="hostUsername" required
-                                   class="input-christmas w-full" 
-                                   placeholder="Your username">
+                            <input type="text" id="hostUsername" required class="input-christmas" placeholder="Your username">
                         </div>
                         <div>
                             <label class="block text-gray-700 font-bold mb-2">Password</label>
-                            <input type="password" id="hostPassword" required
-                                   class="input-christmas w-full" 
-                                   placeholder="Your password">
+                            <input type="password" id="hostPassword" required class="input-christmas" placeholder="Your password">
                         </div>
-                        <button type="submit" class="btn-christmas w-full">
-                            🔓 Sign In as Host
-                        </button>
+                        <button type="submit" class="btn-christmas w-full">🔓 Sign In as Host</button>
                     </form>
                 </div>
                 
+                <!-- Host Management Panel -->
                 <div id="hostManagement" class="hidden space-y-6">
                     <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-                        <h3 class="font-bold text-green-800 mb-4">👥 Registered Participants (<span id="participantCount">0</span>)</h3>
+                        <h3 class="font-bold text-green-800 mb-4">👥 Participants (<span id="participantCount">0</span>)</h3>
                         <div id="participantList" class="space-y-2"></div>
-                        
-                        <button id="refreshBtn" onclick="refreshParticipants()" type="button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        <button onclick="refreshParticipants()" type="button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                             🔄 Refresh List
                         </button>
                     </div>
                     
                     <div id="startRoomSection" class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6">
                         <h3 class="font-bold text-yellow-800 mb-2">🚀 Ready to Start?</h3>
-                        <p class="text-gray-700 mb-4">Once you start the room, assignments will be generated and participants can sign in to see who they're buying for. You cannot add/remove participants after starting.</p>
-                        <button id="startRoomBtn" onclick="startRoom()" type="button" class="btn-christmas w-full">
-                            🎁 Start Secret Santa Room
-                        </button>
+                        <p class="text-gray-700 mb-4">Once started, assignments are generated and no changes allowed.</p>
+                        <button onclick="startRoom()" type="button" class="btn-christmas w-full">🎁 Start Secret Santa</button>
                     </div>
                     
                     <div id="roomStartedMessage" class="hidden bg-green-50 border-2 border-green-300 rounded-lg p-6">
                         <h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3>
-                        <p class="text-gray-700">All participants can now sign in to view their assignments.</p>
+                        <p class="text-gray-700">Participants can now sign in to view their assignments.</p>
                     </div>
                 </div>
             </div>
             
-            <!-- Participant Login View -->
+            <!-- Login View -->
             <div id="loginView" class="hidden">
                 <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
                     <h3 class="font-bold text-blue-800 mb-2">🔐 Sign In</h3>
-                    <p class="text-gray-700">The room has started! Sign in with your credentials to see your Secret Santa assignment.</p>
+                    <p class="text-gray-700">The room has started! Sign in to see your Secret Santa assignment.</p>
                 </div>
                 
                 <form id="loginForm" class="space-y-4">
                     <div>
                         <label class="block text-gray-700 font-bold mb-2">Username</label>
-                        <input type="text" id="loginUsername" required 
-                               class="input-christmas w-full" 
-                               placeholder="Your username">
+                        <input type="text" id="loginUsername" required class="input-christmas" placeholder="Your username">
                     </div>
-                    
                     <div>
                         <label class="block text-gray-700 font-bold mb-2">Password</label>
-                        <input type="password" id="loginPassword" required
-                               class="input-christmas w-full" 
-                               placeholder="Your password">
+                        <input type="password" id="loginPassword" required class="input-christmas" placeholder="Your password">
                     </div>
-                    
-                    <button type="submit" class="btn-christmas w-full">
-                        🎁 View My Assignment
-                    </button>
+                    <button type="submit" class="btn-christmas w-full">🎁 View My Assignment</button>
                 </form>
             </div>
             
             <!-- Assignment Reveal View -->
             <div id="assignmentView" class="hidden">
                 <div class="bg-gradient-to-r from-yellow-50 to-green-50 border-3 border-red-400 rounded-xl p-8 reveal-animation">
-                    <h3 class="christmas-font text-4xl text-red-800 mb-4 text-center">🎅 Your Secret Santa Assignment 🎄</h3>
+                    <h3 class="christmas-font text-4xl text-red-800 mb-4 text-center">🎅 Your Assignment 🎄</h3>
                     <div class="text-xl font-bold text-gray-800 mb-2 text-center">
                         <span id="loggedInUsername"></span>, you are buying a gift for:
                     </div>
                     <div id="assignedPerson" class="christmas-font text-6xl text-red-700 mb-6 text-center"></div>
-                    
                     <div class="text-gray-700 text-center space-y-2">
                         <p>🤫 Keep it a secret!</p>
                         <p>🎁 Make it special!</p>
-                        <p>❄️ Spread the Christmas joy!</p>
+                        <p>❄️ Spread the joy!</p>
                     </div>
                 </div>
             </div>
@@ -286,119 +138,33 @@
         </div>
     </div>
 
+    <!-- Crypto Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/node-forge@1.3.1/dist/forge.min.js"></script>
+    <script src="/shared-utils.js"></script>
+    
     <script>
-        // Verify libraries loaded
-        if (typeof forge === 'undefined') {
-            alert('Failed to load encryption library. Please refresh the page.');
-            throw new Error('forge library not loaded');
-        }
-        if (typeof CryptoJS === 'undefined') {
-            alert('Failed to load crypto library. Please refresh the page.');
-            throw new Error('CryptoJS library not loaded');
-        }
-        
-        // Create snowflakes
-        function createSnowflakes() {
-            const snow = document.getElementById('snow');
-            const snowflakeSymbols = ['❄', '❅', '❆'];
-            
-            for (let i = 0; i < 50; i++) {
-                const snowflake = document.createElement('div');
-                snowflake.className = 'snowflake';
-                snowflake.innerHTML = snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)];
-                snowflake.style.left = Math.random() * 100 + '%';
-                snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
-                snowflake.style.opacity = Math.random();
-                snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
-                snowflake.style.animationDelay = Math.random() * 2 + 's';
-                snow.appendChild(snowflake);
-            }
-        }
-        
-        createSnowflakes();
-        
-        // Get room ID from URL
-        const urlParts = window.location.pathname.split('/');
-        const roomId = urlParts[urlParts.length - 1];
-        
-        let currentHostPassword = null;
-        let currentHostUsername = null;
+        // State
+        const roomId = window.location.pathname.split('/').pop();
         let currentRoom = null;
-        let isHost = false;
+        let currentHostUsername = null;
+        let currentHostPassword = null;
         
-        // Derive deterministic RSA key pair from password
-        function deriveKeyPairFromPassword(username, password, roomId, keySalt) {
-            // Create deterministic seed
-            const seed = username + password + roomId;
-            
-            // Use PBKDF2 to derive strong key material (600k iterations for security)
-            const keyMaterial = CryptoJS.PBKDF2(seed, keySalt, {
-                keySize: 512/32,
-                iterations: 100000  // Increased from 1000 for security
-            }).toString();
-            
-            // Convert hex string to bytes
-            const seedBytes = forge.util.hexToBytes(keyMaterial);
-            
-            // Create a deterministic PRNG
-            const prng = forge.random.createInstance();
-            prng.seedFileSync = () => seedBytes;
-            
-            // Generate RSA key pair (will be the same for same seed)
-            const keypair = forge.pki.rsa.generateKeyPair({
-                bits: 2048,
-                prng: prng,
-                workers: 0
-            });
-            
-            return keypair;
-        }
-        
-        // Export public key to PEM format
-        function exportPublicKey(publicKey) {
-            return forge.pki.publicKeyToPem(publicKey);
-        }
-        
-        // Decrypt with private key
-        function decryptWithPrivateKey(encryptedBase64, privateKey) {
-            try {
-                const encrypted = forge.util.decode64(encryptedBase64);
-                const decrypted = privateKey.decrypt(encrypted, 'RSA-OAEP', {
-                    md: forge.md.sha256.create(),
-                    mgf1: {
-                        md: forge.md.sha256.create()
-                    }
-                });
-                return decrypted;
-            } catch (error) {
-                console.error('Decryption error:', error);
-                return null;
-            }
-        }
-        
-        // Show view
+        // View Management
         function showView(viewId) {
-            ['registerView', 'hostView', 'loginView', 'assignmentView', 'errorView'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
-            });
+            ['registerView', 'hostView', 'loginView', 'assignmentView', 'errorView']
+                .forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(viewId).classList.remove('hidden');
         }
         
-        // Show error
         function showError(message) {
             document.getElementById('errorMessage').textContent = message;
             showView('errorView');
         }
         
-        // Load room info and determine view
+        // Load Room
         async function loadRoom() {
             try {
-                // Check if we have stored host credentials
-                const storedUsername = sessionStorage.getItem(`hostUser_${roomId}`);
-                const storedPassword = sessionStorage.getItem(`hostPass_${roomId}`);
-                
                 const response = await fetch(`/api/rooms/${roomId}`);
                 const room = await response.json();
                 
@@ -410,45 +176,40 @@
                 currentRoom = room;
                 document.getElementById('roomNameDisplay').textContent = room.name;
                 
-                // Try to authenticate with stored credentials
-                if (storedUsername && storedPassword) {
+                // Try stored host credentials
+                const storedUser = sessionStorage.getItem(`hostUser_${roomId}`);
+                const storedPass = sessionStorage.getItem(`hostPass_${roomId}`);
+                
+                if (storedUser && storedPass) {
                     const authResponse = await fetch(`/api/rooms/${roomId}/host-auth`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            username: storedUsername, 
-                            password: storedPassword 
-                        })
+                        body: JSON.stringify({ username: storedUser, password: storedPass })
                     });
                     
                     if (authResponse.ok) {
                         const data = await authResponse.json();
-                        isHost = true;
-                        currentHostUsername = storedUsername;
-                        currentHostPassword = storedPassword;
+                        currentHostUsername = storedUser;
+                        currentHostPassword = storedPass;
                         currentRoom = data;
                         showHostManagementView(data);
                         return;
                     }
                 }
                 
-                // No stored credentials or auth failed, show appropriate view
-                if (room.status === 'started') {
-                    showView('loginView');
-                } else {
-                    showView('registerView');
-                }
+                // Show appropriate view
+                showView(room.status === 'started' ? 'loginView' : 'registerView');
             } catch (error) {
                 showError('Error loading room: ' + error.message);
             }
         }
         
-        // Show host management view
+        // Host Management View
         function showHostManagementView(data) {
             showView('hostView');
             document.getElementById('hostAuthForm').classList.add('hidden');
             document.getElementById('hostManagement').classList.remove('hidden');
-            displayParticipants(data.participants);
+            displayParticipants(data.participants, true);
             
             if (data.status === 'started') {
                 document.getElementById('startRoomSection').classList.add('hidden');
@@ -456,116 +217,172 @@
             }
         }
         
-        // Participant registration
+        // Participant View (non-host)
+        function showParticipantView(roomData) {
+            showView('hostView');
+            document.getElementById('hostAuthForm').classList.add('hidden');
+            document.getElementById('hostManagement').classList.remove('hidden');
+            displayParticipants(roomData.participants, false);
+            
+            // Hide management controls for non-host
+            document.getElementById('startRoomSection').classList.add('hidden');
+            
+            if (roomData.status === 'started') {
+                document.getElementById('roomStartedMessage').innerHTML = '<h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3><p class="text-gray-700">You can now sign in to view your assignment!</p><button onclick="location.reload()" class="btn-christmas w-full mt-4">🎁 Sign In to View Assignment</button>';
+                document.getElementById('roomStartedMessage').classList.remove('hidden');
+            } else {
+                document.getElementById('roomStartedMessage').innerHTML = '<h3 class="font-bold text-blue-800 mb-2">⏳ Waiting for Host</h3><p class="text-gray-700">The host will start the room soon. You\'ll be able to sign in once it starts!</p>';
+                document.getElementById('roomStartedMessage').classList.remove('hidden');
+            }
+        }
+        
+        // Display Participants
+        function displayParticipants(participants, isHost = true) {
+            const list = document.getElementById('participantList');
+            const count = document.getElementById('participantCount');
+            
+            // Handle undefined or null participants
+            if (!participants || !Array.isArray(participants)) {
+                count.textContent = '0';
+                list.innerHTML = '<p class="text-gray-500 italic">No participants yet. Share the room link!</p>';
+                return;
+            }
+            
+            count.textContent = participants.length;
+            list.innerHTML = participants.length === 0 
+                ? '<p class="text-gray-500 italic">No participants yet. Share the room link!</p>'
+                : participants.map(p => `
+                    <div class="flex items-center justify-between bg-white p-3 rounded border border-gray-300">
+                        <span class="font-bold text-gray-700">${p.username}</span>
+                        ${isHost && currentRoom?.status === 'open' ? 
+                            `<button onclick="removeParticipant('${p.username}')" class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">Remove</button>` 
+                            : ''}
+                    </div>
+                `).join('');
+        }
+        
+        // Refresh Participants
+        async function refreshParticipants() {
+            if (!currentHostUsername || !currentHostPassword) return;
+            
+            try {
+                const response = await fetch(`/api/rooms/${roomId}/host-auth`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentHostUsername, password: currentHostPassword })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    currentRoom = data;
+                    displayParticipants(data.participants, true);
+                }
+            } catch (error) {
+                console.error('Error refreshing:', error);
+            }
+        }
+        
+        // Remove Participant
+        async function removeParticipant(username) {
+            try {
+                const response = await fetch(`/api/rooms/${roomId}/remove-participant`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hostUsername: currentHostUsername, hostPassword: currentHostPassword, username })
+                });
+                
+                if (response.ok) {
+                    await refreshParticipants();
+                } else {
+                    const data = await response.json();
+                    showError(data.error);
+                }
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+        
+        // Start Room
+        async function startRoom() {
+            if (!currentRoom || currentRoom.participants.length < 2) {
+                showError('You need at least 2 participants to start the room!');
+                return;
+            }
+            
+            const btn = event.target;
+            try {
+                setButtonState(btn, 'Starting...', true);
+                await refreshParticipants();
+                
+                const response = await fetch(`/api/rooms/${roomId}/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hostUsername: currentHostUsername, hostPassword: currentHostPassword })
+                });
+                
+                if (response.ok) {
+                    document.getElementById('startRoomSection').classList.add('hidden');
+                    const msg = document.getElementById('roomStartedMessage');
+                    msg.classList.remove('hidden');
+                    msg.innerHTML = '<h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3><p class="text-gray-700">🎉 Assignments generated! Participants can now sign in to view their assignments.</p>';
+                } else {
+                    const data = await response.json();
+                    showError(data.error);
+                    setButtonState(btn, '🎁 Start Secret Santa', false);
+                }
+            } catch (error) {
+                showError(error.message);
+                setButtonState(btn, '🎁 Start Secret Santa', false);
+            }
+        }
+        
+        // Registration Form
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
-            const submitButton = e.target.querySelector('button[type="submit"]');
+            const btn = e.target.querySelector('button');
             
             try {
-                submitButton.disabled = true;
-                submitButton.textContent = '📡 Requesting encryption parameters...';
+                const data = await registerUser(roomId, username, password, btn);
                 
-                // Step 1: Request a keySalt from server (register without public key first)
-                const initResponse = await fetch(`/api/rooms/${roomId}/init-register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        username, 
-                        password
-                    })
-                });
-                
-                const initData = await initResponse.json();
-                
-                if (!initResponse.ok) {
-                    alert('Error: ' + initData.error);
-                    submitButton.disabled = false;
-                    submitButton.textContent = '✨ Register & Join';
-                    return;
-                }
-                
-                // Get keySalt from server
-                const keySalt = initData.keySalt;
-                
-                submitButton.textContent = '🔐 Generating encryption keys...';
-                
-                // Use setTimeout to allow UI to update
-                await new Promise(resolve => setTimeout(resolve, 100));
-                
-                submitButton.textContent = '⚙️ Deriving cryptographic keys (this may take 10-15 seconds)...';
-                
-                // Step 2: Generate keypair with server-provided salt
-                const keypair = deriveKeyPairFromPassword(username, password, roomId, keySalt);
-                
-                // Export public key
-                const publicKeyPem = exportPublicKey(keypair.publicKey);
-                
-                submitButton.textContent = '📡 Completing registration...';
-                
-                // Step 3: Complete registration with public key and keySalt
-                const response = await fetch(`/api/rooms/${roomId}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        username, 
-                        password,
-                        publicKey: publicKeyPem,
-                        keySalt: keySalt
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    submitButton.textContent = '✅ Registration complete!';
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                if (data.isHost) {
+                    currentHostUsername = username;
+                    currentHostPassword = password;
+                    sessionStorage.setItem(`hostUser_${roomId}`, username);
+                    sessionStorage.setItem(`hostPass_${roomId}`, password);
                     
-                    if (data.isHost) {
-                        // This is the host, save credentials and show host view
-                        isHost = true;
-                        currentHostUsername = username;
-                        currentHostPassword = password;
-                        sessionStorage.setItem(`hostUser_${roomId}`, username);
-                        sessionStorage.setItem(`hostPass_${roomId}`, password);
-                        
-                        // Fetch full host data and show management view
-                        const authResponse = await fetch(`/api/rooms/${roomId}/host-auth`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ username, password })
-                        });
-                        
-                        if (authResponse.ok) {
-                            const hostData = await authResponse.json();
-                            currentRoom = hostData;
-                            showHostManagementView(hostData);
-                        }
-                    } else if (data.alreadyRegistered) {
-                        // User already registered, show participant management view
-                        currentRoom = data.roomDetails;
-                        showParticipantManagementView(data.roomDetails);
-                    } else {
-                        // New registration
-                        alert('✅ Registered successfully!\n\nRemember your password - you\'ll need it to decrypt your assignment later.');
-                        document.getElementById('registerForm').classList.add('hidden');
-                        document.getElementById('registerSuccess').classList.remove('hidden');
+                    const authResponse = await fetch(`/api/rooms/${roomId}/host-auth`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    
+                    if (authResponse.ok) {
+                        currentRoom = await authResponse.json();
+                        showHostManagementView(currentRoom);
                     }
                 } else {
-                    alert('Error: ' + data.error);
+                    // Non-host participant - show participant view
+                    // Check if registration response includes roomDetails
+                    if (data.roomDetails) {
+                        showParticipantView(data.roomDetails);
+                    } else {
+                        // Fallback: fetch room data
+                        const roomResponse = await fetch(`/api/rooms/${roomId}`);
+                        if (roomResponse.ok) {
+                            const roomData = await roomResponse.json();
+                            showParticipantView(roomData);
+                        }
+                    }
                 }
             } catch (error) {
-                console.error('Registration error:', error);
-                alert('Error registering: ' + error.message);
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = '✨ Register & Join';
+                showError(error.message);
             }
         });
         
-        // Host authentication
+        // Host Login Form
         document.getElementById('hostLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -579,10 +396,8 @@
                     body: JSON.stringify({ username, password })
                 });
                 
-                const data = await response.json();
-                
                 if (response.ok) {
-                    isHost = true;
+                    const data = await response.json();
                     currentHostUsername = username;
                     currentHostPassword = password;
                     currentRoom = data;
@@ -590,240 +405,30 @@
                     sessionStorage.setItem(`hostPass_${roomId}`, password);
                     showHostManagementView(data);
                 } else {
-                    alert('Error: ' + data.error);
+                    const data = await response.json();
+                    showError(data.error);
                 }
             } catch (error) {
-                alert('Error authenticating: ' + error.message);
+                showError(error.message);
             }
         });
         
-        // Display participants
-        function displayParticipants(participants, isHost = true) {
-            const list = document.getElementById('participantList');
-            const count = document.getElementById('participantCount');
-            
-            count.textContent = participants.length;
-            list.innerHTML = '';
-            
-            if (participants.length === 0) {
-                list.innerHTML = '<p class="text-gray-500 italic">No participants yet. Share the room link!</p>';
-                return;
-            }
-            
-            participants.forEach(p => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between bg-white p-3 rounded border border-gray-300';
-                div.innerHTML = `
-                    <span class="font-bold text-gray-700">${p.username}</span>
-                    ${isHost && currentRoom && currentRoom.status === 'open' ? `
-                        <button onclick="removeParticipant('${p.username}')" class="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
-                            Remove
-                        </button>
-                    ` : ''}
-                `;
-                list.appendChild(div);
-            });
-        }
-        
-        // Show participant management view (for non-host participants)
-        function showParticipantManagementView(roomDetails) {
-            showView('hostView');
-            document.getElementById('hostAuthForm').classList.add('hidden');
-            document.getElementById('hostManagement').classList.remove('hidden');
-            
-            // Update title to indicate participant view
-            const title = document.createElement('div');
-            title.className = 'bg-blue-50 border-2 border-blue-300 rounded-lg p-4 mb-4';
-            title.innerHTML = '<h3 class="font-bold text-blue-800">📋 Participant View</h3><p class="text-gray-700">Waiting for the host to start the room...</p>';
-            document.getElementById('hostManagement').insertBefore(title, document.getElementById('hostManagement').firstChild);
-            
-            displayParticipants(roomDetails.participants, false);
-            
-            // Hide start room section for non-host
-            document.getElementById('startRoomSection').classList.add('hidden');
-            
-            if (roomDetails.status === 'started') {
-                document.getElementById('roomStartedMessage').classList.remove('hidden');
-                // Add message to go sign in
-                const signInPrompt = document.createElement('div');
-                signInPrompt.className = 'bg-green-50 border-2 border-green-300 rounded-lg p-4 mt-4';
-                signInPrompt.innerHTML = '<p class="text-green-800 font-bold mb-2">The room has started!</p><button onclick="location.reload()" class="btn-christmas w-full">🎁 Sign In to View Assignment</button>';
-                document.getElementById('roomStartedMessage').appendChild(signInPrompt);
-            }
-            
-            // Add auto-refresh for participants
-            setInterval(async () => {
-                try {
-                    const response = await fetch(`/api/rooms/${roomId}`);
-                    const room = await response.json();
-                    if (response.ok && room.status === 'started') {
-                        location.reload();
-                    }
-                } catch (e) {
-                    console.error('Error checking room status:', e);
-                }
-            }, 5000); // Check every 5 seconds
-        }
-        
-        // Refresh participants
-        async function refreshParticipants() {
-            if (!currentHostUsername || !currentHostPassword) return;
-            
-            try {
-                const response = await fetch(`/api/rooms/${roomId}/host-auth`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        username: currentHostUsername,
-                        password: currentHostPassword 
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    currentRoom = data;
-                    displayParticipants(data.participants);
-                }
-            } catch (error) {
-                console.error('Error refreshing:', error);
-            }
-        }
-        
-        // Remove participant
-        async function removeParticipant(username) {
-            if (!confirm(`Remove ${username} from the room?`)) return;
-            
-            try {
-                const response = await fetch(`/api/rooms/${roomId}/remove-participant`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        hostUsername: currentHostUsername,
-                        hostPassword: currentHostPassword,
-                        username 
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    await refreshParticipants();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                alert('Error removing participant: ' + error.message);
-            }
-        }
-        
-        // Start room
-        async function startRoom() {
-            if (!currentRoom || currentRoom.participants.length < 2) {
-                alert('You need at least 2 participants to start the room!');
-                return;
-            }
-            
-            if (!confirm(`Start the Secret Santa draw with ${currentRoom.participants.length} participants?\n\nOnce started:\n- No more participants can join\n- Assignments will be generated automatically by the server\n- Participants can log in to see their assignments`)) {
-                return;
-            }
-            
-            const startButton = document.querySelector('button[onclick="startRoom()"]');
-            
-            try {
-                startButton.disabled = true;
-                startButton.textContent = 'Starting...';
-                
-                // Refresh to get latest participants
-                await refreshParticipants();
-                
-                // Server will generate and encrypt assignments
-                const response = await fetch(`/api/rooms/${roomId}/start`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        hostUsername: currentHostUsername,
-                        hostPassword: currentHostPassword
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    document.getElementById('startRoomSection').classList.add('hidden');
-                    document.getElementById('roomStartedMessage').classList.remove('hidden');
-                    alert('🎉 Room started!\n\nAssignments have been generated and encrypted by the server.\nParticipants can now log in to see who they\'re buying for!');
-                } else {
-                    alert('Error: ' + data.error);
-                    startButton.disabled = false;
-                    startButton.textContent = 'Start Secret Santa Draw';
-                }
-            } catch (error) {
-                alert('Error starting room: ' + error.message);
-                startButton.disabled = false;
-                startButton.textContent = 'Start Secret Santa Draw';
-            }
-        }
-        
-        // Participant login
+        // Login Form
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
-            const submitButton = e.target.querySelector('button[type="submit"]');
+            const btn = e.target.querySelector('button');
             
             try {
-                submitButton.disabled = true;
-                submitButton.textContent = '🔓 Authenticating...';
+                const result = await loginAndDecrypt(roomId, username, password, btn);
                 
-                const response = await fetch(`/api/rooms/${roomId}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    submitButton.textContent = '🔐 Deriving decryption key...';
-                    
-                    // Use setTimeout to allow UI to update
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    // Re-derive the same private key from password using server-provided salt
-                    const keypair = deriveKeyPairFromPassword(username, password, roomId, data.keySalt);
-                    
-                    submitButton.textContent = '🎁 Decrypting your assignment (10-15 seconds)...';
-                    
-                    // Decrypt assignment with private key
-                    const assignment = decryptWithPrivateKey(data.encryptedAssignment, keypair.privateKey);
-                    
-                    if (!assignment) {
-                        alert('❌ Failed to decrypt assignment.\n\nThis usually means:\n1. Wrong password\n2. You registered with a different password\n\nPlease try again with the correct password.');
-                        submitButton.disabled = false;
-                        submitButton.textContent = '🎁 View My Assignment';
-                        return;
-                    }
-                    
-                    submitButton.textContent = '✅ Decryption successful!';
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    
-                    // Display assignment
-                    document.getElementById('loggedInUsername').textContent = username;
-                    document.getElementById('assignedPerson').textContent = assignment;
-                    document.getElementById('assignmentView').classList.add('reveal-animation');
-                    showView('assignmentView');
-                } else {
-                    alert('Error: ' + data.error);
-                    submitButton.disabled = false;
-                    submitButton.textContent = '🎁 View My Assignment';
-                }
+                document.getElementById('loggedInUsername').textContent = result.username;
+                document.getElementById('assignedPerson').textContent = result.assignment;
+                showView('assignmentView');
             } catch (error) {
-                console.error('Login error:', error);
-                alert('Error logging in: ' + error.message);
-                submitButton.disabled = false;
-                submitButton.textContent = '🎁 View My Assignment';
+                showError(error.message);
             }
         });
         
