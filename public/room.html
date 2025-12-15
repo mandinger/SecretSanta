@@ -14,15 +14,24 @@
         <div class="christmas-card p-8 max-w-4xl w-full">
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="christmas-font text-5xl text-red-700 mb-2">🎅 Secret Santa 🎄</h1>
+                <h1 class="christmas-font text-5xl text-red-700 mb-2" data-i18n="room.header.title">🎅 Secret Santa 🎄</h1>
                 <h2 id="roomNameDisplay" class="text-2xl text-gray-700 font-bold"></h2>
+            </div>
+            <!-- Room Info (visible to everyone) -->
+            <div id="roomInfoCard" class="bg-white border-2 border-gray-200 rounded-lg p-6 mb-6">
+                <h3 class="font-bold text-gray-800 mb-2" data-i18n="room.info.sectionTitle">ℹ️ Room Info</h3>
+                <div class="text-gray-700">
+                    <p><strong data-i18n="room.info.budget">Budget</strong>: <span id="infoBudget"></span></p>
+                    <p class="mt-1"><strong data-i18n="room.info.instructions">Instructions</strong>:</p>
+                    <div id="infoInstructions" class="whitespace-pre-wrap"></div>
+                </div>
             </div>
             
             <!-- Registration View -->
             <div id="registerView" class="hidden">
                 <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
-                    <h3 class="font-bold text-blue-800 mb-2">🎁 Join or Access the Secret Santa!</h3>
-                    <p class="text-gray-700">
+                    <h3 class="font-bold text-blue-800 mb-2" data-i18n="room.registration.introTitle">🎁 Join or Access the Secret Santa!</h3>
+                    <p class="text-gray-700" data-i18n-html="room.registration.introText">
                         <strong>New participant?</strong> Create your account below to join.<br>
                         <strong>Already registered?</strong> Enter your credentials to access the room.
                     </p>
@@ -30,20 +39,25 @@
                 
                 <form id="registerForm" class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Username</label>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="room.registration.username">Username</label>
                         <input type="text" id="regUsername" required class="input-christmas" placeholder="Your name">
                     </div>
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Password</label>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="room.registration.password">Password</label>
                         <input type="password" id="regPassword" required minlength="4" class="input-christmas" placeholder="Your password">
-                        <p class="text-xs text-gray-600 mt-1">⚠️ New users: Choose a password you'll remember. Existing users: Enter your password.</p>
+                        <p class="text-xs text-gray-600 mt-1" data-i18n="room.registration.password.help">⚠️ New users: Choose a password you'll remember. Existing users: Enter your password.</p>
                     </div>
-                    <button type="submit" class="btn-christmas w-full">✨ Continue</button>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="room.preferences.sectionTitle">🎯 Gift Preferences</label>
+                        <textarea id="regPreferences" class="input-christmas" rows="3" data-i18n-placeholder="room.preferences.textarea.placeholder" placeholder="Likes, dislikes, allergies, ideas..."></textarea>
+                        <p id="regPrefsSaved" class="hidden text-green-700 text-sm mt-1" data-i18n="room.preferences.saved">✅ Preferences saved</p>
+                    </div>
+                    <button type="submit" class="btn-christmas w-full" data-i18n="shared.btn.registerJoin">✨ Continue</button>
                 </form>
                 
                 <div id="registerSuccess" class="hidden mt-6 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
-                    <h4 class="font-bold text-green-800 mb-2">✅ Registration Successful!</h4>
-                    <p class="text-green-700">Wait for the host to start the room, then sign in to see your assignment!</p>
+                    <h4 class="font-bold text-green-800 mb-2" data-i18n="room.registration.successTitle">✅ Registration Successful!</h4>
+                    <p class="text-green-700" data-i18n="room.registration.successText">Wait for the host to start the room, then sign in to see your assignment!</p>
                 </div>
             </div>
             
@@ -52,42 +66,60 @@
                 <!-- Host Auth Form -->
                 <div id="hostAuthForm" class="mb-6">
                     <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
-                        <h3 class="font-bold text-yellow-800 mb-2">🔑 Host Sign In</h3>
-                        <p class="text-gray-700">Sign in to manage this room.</p>
+                        <h3 class="font-bold text-yellow-800 mb-2" data-i18n="room.hostAuth.title">🔑 Host Sign In</h3>
+                        <p class="text-gray-700" data-i18n="room.hostAuth.text">Sign in to manage this room.</p>
                     </div>
                     
                     <form id="hostLoginForm" class="space-y-4">
                         <div>
-                            <label class="block text-gray-700 font-bold mb-2">Username</label>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="room.hostAuth.username">Username</label>
                             <input type="text" id="hostUsername" required class="input-christmas" placeholder="Your username">
                         </div>
                         <div>
-                            <label class="block text-gray-700 font-bold mb-2">Password</label>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="room.hostAuth.password">Password</label>
                             <input type="password" id="hostPassword" required class="input-christmas" placeholder="Your password">
                         </div>
-                        <button type="submit" class="btn-christmas w-full">🔓 Sign In as Host</button>
+                        <button type="submit" class="btn-christmas w-full" data-i18n="shared.btn.signInHost">🔓 Sign In as Host</button>
                     </form>
                 </div>
                 
                 <!-- Host Management Panel -->
                 <div id="hostManagement" class="hidden space-y-6">
+                    <!-- Share Room Link -->
+                    <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+                        <h3 class="font-bold text-blue-800 mb-3" data-i18n="index.success.title">🎉 Room Created!</h3>
+                        <p class="text-gray-700 mb-3" data-i18n="index.success.share">Share this link with your participants:</p>
+                        <div class="flex gap-2 items-center">
+                            <input type="text" id="roomInviteUrl" readonly class="input-christmas flex-1 text-sm">
+                            <button type="button" class="btn-christmas" id="copyInviteBtn" data-i18n="shared.btn.copyLink" onclick="copyInviteLink()">📋 Copy Link</button>
+                        </div>
+                    </div>
+                    <!-- Pairing Blacklist (Host only) -->
+                    <div id="blacklistPanel" class="bg-white border-2 border-gray-200 rounded-lg p-6">
+                        <h3 class="font-bold text-gray-800 mb-2" data-i18n="blacklist.sectionTitle">🚫 Pairing Blacklist</h3>
+                        <p id="blacklistHelp" class="text-xs text-gray-600 mb-3" data-i18n="blacklist.help">Enter usernames to avoid specific pairings (case-insensitive).</p>
+                        <div id="blacklistContainer" class="space-y-2"></div>
+                        <div id="blacklistActions" class="flex gap-2 mt-2">
+                            <button type="button" class="btn-christmas" onclick="addBlacklistRow()" data-i18n="blacklist.addRule">➕ Add Rule</button>
+                            <button type="button" class="btn-christmas" onclick="saveBlacklist()" data-i18n="blacklist.save">💾 Save Blacklist</button>
+                            <span id="blacklistSaved" class="hidden text-green-700 self-center" data-i18n="blacklist.saved">✅ Blacklist saved</span>
+                        </div>
+                    </div>
                     <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6">
-                        <h3 class="font-bold text-green-800 mb-4">👥 Participants (<span id="participantCount">0</span>)</h3>
+                        <h3 class="font-bold text-green-800 mb-4"><span data-i18n="room.participants.title">👥 Participants</span> (<span id="participantCount">0</span>)</h3>
                         <div id="participantList" class="space-y-2"></div>
-                        <button onclick="refreshParticipants()" type="button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                            🔄 Refresh List
-                        </button>
+                        <button onclick="refreshParticipants()" type="button" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" data-i18n="room.refreshList">🔄 Refresh List</button>
                     </div>
                     
                     <div id="startRoomSection" class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-6">
-                        <h3 class="font-bold text-yellow-800 mb-2">🚀 Ready to Start?</h3>
-                        <p class="text-gray-700 mb-4">Once started, assignments are generated and no changes allowed.</p>
-                        <button onclick="startRoom()" type="button" class="btn-christmas w-full">🎁 Start Secret Santa</button>
+                        <h3 class="font-bold text-yellow-800 mb-2" data-i18n="room.start.readyTitle">🚀 Ready to Start?</h3>
+                        <p class="text-gray-700 mb-4" data-i18n="room.start.desc">Once started, assignments are generated and no changes allowed.</p>
+                        <button onclick="startRoom()" type="button" class="btn-christmas w-full" data-i18n="shared.btn.startSecretSanta">🎁 Start Secret Santa</button>
                     </div>
                     
                     <div id="roomStartedMessage" class="hidden bg-green-50 border-2 border-green-300 rounded-lg p-6">
-                        <h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3>
-                        <p class="text-gray-700">Participants can now sign in to view their assignments.</p>
+                        <h3 class="font-bold text-green-800 mb-2" data-i18n="room.roomStarted.title">✅ Room Started!</h3>
+                        <p class="text-gray-700" data-i18n="room.roomStarted.desc">Participants can now sign in to view their assignments.</p>
                     </div>
                 </div>
             </div>
@@ -95,35 +127,39 @@
             <!-- Login View -->
             <div id="loginView" class="hidden">
                 <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-6 mb-6">
-                    <h3 class="font-bold text-blue-800 mb-2">🔐 Sign In</h3>
-                    <p class="text-gray-700">The room has started! Sign in to see your Secret Santa assignment.</p>
+                    <h3 class="font-bold text-blue-800 mb-2" data-i18n="room.login.title">🔐 Sign In</h3>
+                    <p class="text-gray-700" data-i18n="room.login.desc">The room has started! Sign in to see your Secret Santa assignment.</p>
                 </div>
                 
                 <form id="loginForm" class="space-y-4">
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Username</label>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="room.registration.username">Username</label>
                         <input type="text" id="loginUsername" required class="input-christmas" placeholder="Your username">
                     </div>
                     <div>
-                        <label class="block text-gray-700 font-bold mb-2">Password</label>
+                        <label class="block text-gray-700 font-bold mb-2" data-i18n="room.registration.password">Password</label>
                         <input type="password" id="loginPassword" required class="input-christmas" placeholder="Your password">
                     </div>
-                    <button type="submit" class="btn-christmas w-full">🎁 View My Assignment</button>
+                    <button type="submit" class="btn-christmas w-full" data-i18n="shared.btn.viewAssignment">🎁 View My Assignment</button>
                 </form>
             </div>
             
             <!-- Assignment Reveal View -->
             <div id="assignmentView" class="hidden">
                 <div class="bg-gradient-to-r from-yellow-50 to-green-50 border-3 border-red-400 rounded-xl p-8 reveal-animation">
-                    <h3 class="christmas-font text-4xl text-red-800 mb-4 text-center">🎅 Your Assignment 🎄</h3>
-                    <div class="text-xl font-bold text-gray-800 mb-2 text-center">
+                    <h3 class="christmas-font text-4xl text-red-800 mb-4 text-center" data-i18n="shared.assignments.title">🎅 Your Assignment 🎄</h3>
+                    <div class="text-xl font-bold text-gray-800 mb-2 text-center" id="assignmentSubtitle">
                         <span id="loggedInUsername"></span>, you are buying a gift for:
                     </div>
                     <div id="assignedPerson" class="christmas-font text-6xl text-red-700 mb-6 text-center"></div>
+                    <div class="bg-white border border-gray-300 rounded-lg p-4 mt-4">
+                        <h4 class="font-bold text-gray-800 mb-2" data-i18n="room.preferences.recipientTitle">🎁 Your recipient’s preferences</h4>
+                        <div id="recipientPreferences" class="text-gray-700 whitespace-pre-wrap"></div>
+                    </div>
                     <div class="text-gray-700 text-center space-y-2">
-                        <p>🤫 Keep it a secret!</p>
-                        <p>🎁 Make it special!</p>
-                        <p>❄️ Spread the joy!</p>
+                        <p data-i18n="shared.assignments.keepSecret">🤫 Keep it a secret!</p>
+                        <p data-i18n="shared.assignments.makeSpecial">🎁 Make it special!</p>
+                        <p data-i18n="shared.assignments.spreadJoy">❄️ Spread the joy!</p>
                     </div>
                 </div>
             </div>
@@ -131,7 +167,7 @@
             <!-- Error View -->
             <div id="errorView" class="hidden">
                 <div class="bg-red-100 border-2 border-red-400 p-6 rounded-lg text-center">
-                    <h3 class="text-xl font-bold text-red-800 mb-2">❌ Error</h3>
+                    <h3 class="text-xl font-bold text-red-800 mb-2" data-i18n="room.error.title">❌ Error</h3>
                     <p id="errorMessage" class="text-red-600"></p>
                 </div>
             </div>
@@ -175,6 +211,7 @@
                 
                 currentRoom = room;
                 document.getElementById('roomNameDisplay').textContent = room.name;
+                populateRoomInfo(room);
                 
                 // Try stored host credentials
                 const storedUser = sessionStorage.getItem(`hostUser_${roomId}`);
@@ -210,6 +247,12 @@
             document.getElementById('hostAuthForm').classList.add('hidden');
             document.getElementById('hostManagement').classList.remove('hidden');
             displayParticipants(data.participants, true);
+            populateInviteLink();
+            populateRoomInfo(data);
+            renderBlacklist(data.blacklist || [], data.participants || [], false);
+            const bl = document.getElementById('blacklistPanel');
+            if (bl) bl.classList.remove('hidden');
+            setBlacklistReadOnly(false);
             
             if (data.status === 'started') {
                 document.getElementById('startRoomSection').classList.add('hidden');
@@ -223,15 +266,30 @@
             document.getElementById('hostAuthForm').classList.add('hidden');
             document.getElementById('hostManagement').classList.remove('hidden');
             displayParticipants(roomData.participants, false);
+            populateInviteLink();
+            populateRoomInfo(roomData);
             
             // Hide management controls for non-host
             document.getElementById('startRoomSection').classList.add('hidden');
+            (async () => {
+                try {
+                    if (Array.isArray(roomData.blacklist)) {
+                        renderBlacklist(roomData.blacklist, roomData.participants || [], true);
+                    } else {
+                        const pub = await fetch(`/api/rooms/${roomId}`).then(r => r.ok ? r.json() : { blacklist: [] });
+                        renderBlacklist(pub.blacklist || [], roomData.participants || [], true);
+                    }
+                } catch {
+                    renderBlacklist([], roomData.participants || [], true);
+                }
+                setBlacklistReadOnly(true);
+            })();
             
             if (roomData.status === 'started') {
-                document.getElementById('roomStartedMessage').innerHTML = '<h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3><p class="text-gray-700">You can now sign in to view your assignment!</p><button onclick="location.reload()" class="btn-christmas w-full mt-4">🎁 Sign In to View Assignment</button>';
+                document.getElementById('roomStartedMessage').innerHTML = `<h3 class=\"font-bold text-green-800 mb-2\">${t('room.startedHostMsg')}</h3><p class=\"text-gray-700\">${t('room.startedParticipantDesc')}</p><button onclick=\"location.reload()\" class=\"btn-christmas w-full mt-4\">${t('btn.viewAssignment')}</button>`;
                 document.getElementById('roomStartedMessage').classList.remove('hidden');
             } else {
-                document.getElementById('roomStartedMessage').innerHTML = '<h3 class="font-bold text-blue-800 mb-2">⏳ Waiting for Host</h3><p class="text-gray-700">The host will start the room soon. You\'ll be able to sign in once it starts!</p>';
+                document.getElementById('roomStartedMessage').innerHTML = `<h3 class=\"font-bold text-blue-800 mb-2\">${t('room.waitingHostTitle')}</h3><p class=\"text-gray-700\">${t('room.waitingHostDesc')}</p>`;
                 document.getElementById('roomStartedMessage').classList.remove('hidden');
             }
         }
@@ -244,13 +302,13 @@
             // Handle undefined or null participants
             if (!participants || !Array.isArray(participants)) {
                 count.textContent = '0';
-                list.innerHTML = '<p class="text-gray-500 italic">No participants yet. Share the room link!</p>';
+                list.innerHTML = `<p class="text-gray-500 italic">${t('participants.none')}</p>`;
                 return;
             }
             
             count.textContent = participants.length;
             list.innerHTML = participants.length === 0 
-                ? '<p class="text-gray-500 italic">No participants yet. Share the room link!</p>'
+                ? `<p class=\"text-gray-500 italic\">${t('participants.none')}</p>`
                 : participants.map(p => `
                     <div class="flex items-center justify-between bg-white p-3 rounded border border-gray-300">
                         <span class="font-bold text-gray-700">${p.username}</span>
@@ -276,6 +334,8 @@
                     const data = await response.json();
                     currentRoom = data;
                     displayParticipants(data.participants, true);
+                    renderBlacklist(data.blacklist || [], data.participants || [], false);
+                    setBlacklistReadOnly(false);
                 }
             } catch (error) {
                 console.error('Error refreshing:', error);
@@ -311,7 +371,7 @@
             
             const btn = event.target;
             try {
-                setButtonState(btn, 'Starting...', true);
+                setButtonState(btn, t('btn.startSecretSanta'), true);
                 await refreshParticipants();
                 
                 const response = await fetch(`/api/rooms/${roomId}/start`, {
@@ -324,15 +384,15 @@
                     document.getElementById('startRoomSection').classList.add('hidden');
                     const msg = document.getElementById('roomStartedMessage');
                     msg.classList.remove('hidden');
-                    msg.innerHTML = '<h3 class="font-bold text-green-800 mb-2">✅ Room Started!</h3><p class="text-gray-700">🎉 Assignments generated! Participants can now sign in to view their assignments.</p>';
+                    msg.innerHTML = `<h3 class=\"font-bold text-green-800 mb-2\">${t('room.startedHostMsg')}</h3><p class=\"text-gray-700\">${t('room.startedHostDesc')}</p>`;
                 } else {
                     const data = await response.json();
                     showError(data.error);
-                    setButtonState(btn, '🎁 Start Secret Santa', false);
+                    setButtonState(btn, t('btn.startSecretSanta'), false);
                 }
             } catch (error) {
                 showError(error.message);
-                setButtonState(btn, '🎁 Start Secret Santa', false);
+                setButtonState(btn, t('btn.startSecretSanta'), false);
             }
         }
         
@@ -342,10 +402,18 @@
             
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
+            const preferences = document.getElementById('regPreferences').value.trim();
             const btn = e.target.querySelector('button');
             
             try {
                 const data = await registerUser(roomId, username, password, btn);
+                if (preferences && preferences.trim().length > 0) {
+                    await fetch(`/api/rooms/${roomId}/preferences`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password, preferences })
+                    }).then(r => r.ok && (document.getElementById('regPrefsSaved').classList.remove('hidden')));
+                }
                 
                 if (data.isHost) {
                     currentHostUsername = username;
@@ -423,9 +491,18 @@
             
             try {
                 const result = await loginAndDecrypt(roomId, username, password, btn);
-                
                 document.getElementById('loggedInUsername').textContent = result.username;
+                const subtitleEl = document.getElementById('assignmentSubtitle');
+                if (subtitleEl) {
+                    subtitleEl.innerHTML = t('assignments.subtitle', { username: `<span id=\\"loggedInUsername\\">${result.username}</span>` });
+                }
                 document.getElementById('assignedPerson').textContent = result.assignment;
+                const prefsEl = document.getElementById('recipientPreferences');
+                if (prefsEl) {
+                    const m = result.preferencesMap || {};
+                    const val = m[result.assignment] || t('room.preferences.none');
+                    prefsEl.textContent = val;
+                }
                 showView('assignmentView');
             } catch (error) {
                 showError(error.message);
@@ -434,6 +511,145 @@
         
         // Initialize
         loadRoom();
+
+        function populateInviteLink() {
+            const el = document.getElementById('roomInviteUrl');
+            if (el) {
+                el.value = `${location.origin}/room/${roomId}`;
+            }
+        }
+
+        function copyInviteLink() {
+            const el = document.getElementById('roomInviteUrl');
+            const btn = document.getElementById('copyInviteBtn');
+            if (!el || !btn) return;
+            navigator.clipboard.writeText(el.value).then(() => {
+                const original = btn.textContent;
+                btn.textContent = t('copied');
+                btn.classList.add('bg-green-500');
+                btn.classList.remove('bg-blue-500');
+                setTimeout(() => {
+                    btn.textContent = original;
+                    btn.classList.remove('bg-green-500');
+                    btn.classList.add('bg-blue-500');
+                }, 2000);
+            });
+        }
+
+        function rtbExec(id, cmd) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.focus();
+            document.execCommand(cmd, false, null);
+        }
+
+        function insertImage(id) {
+            const url = prompt('Image URL');
+            if (!url) return;
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.focus();
+            document.execCommand('insertImage', false, url);
+        }
+
+        function populateRoomInfo(data) {
+            const ib = document.getElementById('infoBudget');
+            const ii = document.getElementById('infoInstructions');
+            if (ib) ib.textContent = (data.budget || t('room.info.none'));
+            if (ii) ii.textContent = (data.instructions || t('room.info.none'));
+        }
+
+        function participantOptions(participants, selected) {
+            const names = (participants || []).map(p => p.username);
+            return names.map(n => `<option value="${n}" ${selected===n?'selected':''}>${n}</option>`).join('');
+        }
+
+        function displayNameFromRule(nameLower, participants) {
+            const n = String(nameLower || '').toLowerCase();
+            const match = (participants || []).find(p => String(p.username||'').toLowerCase() === n);
+            return match ? match.username : nameLower;
+        }
+
+        function addBlacklistRow(from = '', to = '') {
+            const c = document.getElementById('blacklistContainer');
+            const row = document.createElement('div');
+            row.className = 'flex gap-2 items-center';
+            const parts = currentRoom?.participants || [];
+            row.innerHTML = `
+                <select class="input-christmas">${participantOptions(parts, from)}</select>
+                <span class="px-1 text-gray-500">→</span>
+                <select class="input-christmas">${participantOptions(parts, to)}</select>
+                <button type="button" class="px-3 py-2 bg-red-500 text-white rounded" onclick="this.parentElement.remove()">✖</button>
+            `;
+            c.appendChild(row);
+        }
+
+        function renderBlacklist(rules, participants, readOnly = false) {
+            const c = document.getElementById('blacklistContainer');
+            const panel = document.getElementById('blacklistPanel');
+            if (!c) return;
+            c.innerHTML = '';
+            if (!Array.isArray(rules)) rules = [];
+            if (readOnly) {
+                if (rules.length === 0) {
+                    // Hide panel if nothing to show for standard users
+                    if (panel) panel.classList.add('hidden');
+                } else {
+                    if (panel) panel.classList.remove('hidden');
+                    rules.forEach(r => {
+                        const row = document.createElement('div');
+                        row.className = 'flex gap-2 items-center';
+                        const fromName = displayNameFromRule(r.from, participants);
+                        const toName = displayNameFromRule(r.to, participants);
+                        row.innerHTML = `<span class="font-semibold">${fromName}</span><span class="text-gray-500">→</span><span class="font-semibold">${toName}</span>`;
+                        c.appendChild(row);
+                    });
+                }
+            } else {
+                if (rules.length === 0) {
+                    addBlacklistRow();
+                } else {
+                    rules.forEach(r => addBlacklistRow(r.from, r.to));
+                }
+            }
+        }
+
+        function setBlacklistReadOnly(readOnly) {
+            const actions = document.getElementById('blacklistActions');
+            if (actions) actions.classList.toggle('hidden', !!readOnly);
+            const help = document.getElementById('blacklistHelp');
+            if (help) help.classList.toggle('hidden', !!readOnly);
+        }
+
+        function collectBlacklist() {
+            const c = document.getElementById('blacklistContainer');
+            if (!c) return [];
+            const rows = Array.from(c.children);
+            return rows.map(r => {
+                const selects = r.querySelectorAll('select');
+                return { from: selects[0]?.value || '', to: selects[1]?.value || '' };
+            }).filter(p => (p.from || '').trim() && (p.to || '').trim());
+        }
+
+        async function saveBlacklist() {
+            try {
+                const rules = collectBlacklist();
+                const res = await fetch(`/api/rooms/${roomId}/blacklist`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ hostUsername: currentHostUsername, hostPassword: currentHostPassword, blacklist: rules })
+                });
+                if (res.ok) {
+                    document.getElementById('blacklistSaved').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('blacklistSaved').classList.add('hidden'), 2000);
+                } else {
+                    const data = await res.json();
+                    showError(data.error || 'Failed to save blacklist');
+                }
+            } catch (e) {
+                showError(e.message);
+            }
+        }
     </script>
 </body>
 </html>

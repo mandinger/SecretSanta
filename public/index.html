@@ -14,65 +14,78 @@
         <div class="christmas-card p-8 max-w-2xl w-full">
             <!-- Header -->
             <div class="text-center mb-8">
-                <h1 class="christmas-font text-6xl text-red-700 mb-4">🎅 Secret Santa 🎄</h1>
-                <p class="text-gray-600 text-lg">Create a secure room for your gift exchange!</p>
+                <h1 class="christmas-font text-6xl text-red-700 mb-4" data-i18n="index.header.title">🎅 Secret Santa 🎄</h1>
+                <p class="text-gray-600 text-lg" data-i18n="index.header.subtitle">Create a secure room for your gift exchange!</p>
             </div>
             
             <!-- Creation Form -->
             <form id="roomForm" class="space-y-6">
                 <div>
-                    <label class="block text-gray-700 font-bold mb-2">Room Name</label>
+                    <label class="block text-gray-700 font-bold mb-2" data-i18n="index.form.roomName">Room Name</label>
                     <input type="text" id="roomName" required class="input-christmas" 
-                           placeholder="e.g., Office Christmas Party 2024">
+                           placeholder="e.g., Office Christmas Party 2024" data-i18n-placeholder="index.form.roomName.placeholder">
                 </div>
                 
                 <div class="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-                    <h3 class="font-bold text-blue-800 mb-3">🔐 Host Account</h3>
+                    <h3 class="font-bold text-blue-800 mb-3" data-i18n="index.host.sectionTitle">🔐 Host Account</h3>
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-gray-700 font-bold mb-2">Your Username</label>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="index.host.username">Your Username</label>
                             <input type="text" id="hostUsername" required class="input-christmas" 
                                    placeholder="Your name">
-                            <p class="text-xs text-gray-600 mt-1">You'll use this to manage the room</p>
+                            <p class="text-xs text-gray-600 mt-1" data-i18n="index.host.username.help">You'll use this to manage the room</p>
                         </div>
                         
                         <div>
-                            <label class="block text-gray-700 font-bold mb-2">Host Password</label>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="index.host.password">Host Password</label>
                             <input type="password" id="hostPassword" required minlength="4" class="input-christmas" 
                                    placeholder="Choose a secure password">
-                            <p class="text-xs text-gray-600 mt-1">For managing participants and starting the room</p>
+                            <p class="text-xs text-gray-600 mt-1" data-i18n="index.host.password.help">For managing participants and starting the room</p>
                         </div>
                         
                         <div class="flex items-center">
                             <input type="checkbox" id="autoJoinHost" checked class="w-4 h-4 text-red-600">
-                            <label for="autoJoinHost" class="ml-2 text-gray-700">
-                                Participate in the Secret Santa exchange
-                            </label>
+                            <label for="autoJoinHost" class="ml-2 text-gray-700" data-i18n="index.host.autoJoin">Participate in the Secret Santa exchange</label>
+                        </div>
+
+                        <div id="hostPrefsBlock" class="hidden">
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="room.preferences.sectionTitle">🎯 Gift Preferences</label>
+                            <textarea id="hostPreferences" class="input-christmas" rows="3" data-i18n-placeholder="room.preferences.textarea.placeholder" placeholder="Likes, dislikes, allergies, ideas..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+                    <h3 class="font-bold text-yellow-800 mb-3" data-i18n="room.settings.sectionTitle">🛠️ Room Settings</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="room.settings.budget">Budget</label>
+                            <input type="text" id="roomBudget" class="input-christmas" placeholder="$25">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 font-bold mb-2" data-i18n="room.settings.instructions">General Instructions</label>
+                            <textarea id="roomInstructions" class="input-christmas" rows="3" placeholder="Be creative, have fun..."></textarea>
                         </div>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-christmas w-full text-lg">🎁 Create Room</button>
+                <button type="submit" class="btn-christmas w-full text-lg" data-i18n="shared.btn.createRoom">🎁 Create Room</button>
             </form>
             
             <!-- Success Message -->
             <div id="result" class="hidden mt-8 space-y-4">
                 <div class="bg-green-50 border-2 border-green-300 rounded-lg p-6 text-center">
-                    <h3 class="text-2xl font-bold text-green-800 mb-3">🎉 Room Created!</h3>
-                    <p class="text-green-700 mb-4">Share this link with your participants:</p>
+                    <h3 class="text-2xl font-bold text-green-800 mb-3" data-i18n="index.success.title">🎉 Room Created!</h3>
+                    <p class="text-green-700 mb-4" data-i18n="index.success.share">Share this link with your participants:</p>
                     
                     <div class="flex gap-2 items-center">
                         <input type="text" id="roomUrl" readonly class="input-christmas flex-1 text-sm">
-                        <button onclick="copyLink()" type="button" class="btn-christmas" id="copyBtn">
-                            📋 Copy Link
-                        </button>
+                        <button onclick="copyLink()" type="button" class="btn-christmas" id="copyBtn" data-i18n="shared.btn.copyLink">📋 Copy Link</button>
                     </div>
                 </div>
                 
-                <a id="goToRoom" href="#" class="btn-christmas block text-center text-lg">
-                    🚀 Go to Room
-                </a>
+                <a id="goToRoom" href="#" class="btn-christmas block text-center text-lg" data-i18n="shared.btn.goToRoom">🚀 Go to Room</a>
             </div>
         </div>
     </div>
@@ -83,6 +96,11 @@
     <script src="shared-utils.js"></script>
     
     <script>
+        // Toggle host preferences when auto-join changes
+        document.getElementById('autoJoinHost').addEventListener('change', (e) => {
+            document.getElementById('hostPrefsBlock').classList.toggle('hidden', !e.target.checked);
+        });
+
         // Form submission handler
         document.getElementById('roomForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -92,9 +110,12 @@
             const hostPassword = document.getElementById('hostPassword').value;
             const autoJoinHost = document.getElementById('autoJoinHost').checked;
             const submitButton = e.target.querySelector('button[type="submit"]');
+            const roomBudget = document.getElementById('roomBudget').value;
+            const roomInstructions = document.getElementById('roomInstructions').value;
+            const hostPreferences = (document.getElementById('hostPreferences')?.value || '').trim();
             
             try {
-                setButtonState(submitButton, 'Creating room...', true);
+                setButtonState(submitButton, t('status.creatingRoom'), true);
                 
                 // Create room
                 const response = await fetch('/api/rooms', {
@@ -104,7 +125,9 @@
                         name: roomName,
                         hostUsername,
                         hostPassword,
-                        autoJoinHost: false  // Never auto-join on creation
+                        autoJoinHost: false,  // Never auto-join on creation
+                        budget: roomBudget,
+                        instructions: roomInstructions
                     })
                 });
                 
@@ -116,6 +139,13 @@
                 // Auto-join host if checked
                 if (autoJoinHost) {
                     await registerUser(roomId, hostUsername, hostPassword, submitButton);
+                    if (hostPreferences.length > 0) {
+                        await fetch(`/api/rooms/${roomId}/preferences`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ username: hostUsername, password: hostPassword, preferences: hostPreferences })
+                        });
+                    }
                 }
                 
                 // Store credentials for auto-login
@@ -130,11 +160,11 @@
             } catch (error) {
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'mt-4 p-4 bg-red-50 border-2 border-red-300 rounded-lg text-center';
-                errorDiv.innerHTML = `<p class="text-red-800 font-bold">❌ Error</p><p class="text-red-600">${error.message}</p>`;
+                errorDiv.innerHTML = `<p class=\"text-red-800 font-bold\">${t('error.title')}</p><p class=\"text-red-600\">${error.message}</p>`;
                 document.getElementById('roomForm').appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 5000);
             } finally {
-                setButtonState(submitButton, '🎁 Create Room', false);
+                setButtonState(submitButton, t('btn.createRoom'), false);
             }
         });
         
@@ -145,7 +175,7 @@
             
             navigator.clipboard.writeText(roomUrl).then(() => {
                 const originalText = button.textContent;
-                button.textContent = '✅ Copied!';
+                button.textContent = t('copied');
                 button.classList.add('bg-green-500');
                 button.classList.remove('bg-blue-500');
                 
@@ -156,6 +186,10 @@
                 }, 2000);
             });
         }
+
+        // Preferences are plain text; no rich-text helpers needed
+
+        
     </script>
 </body>
 </html>

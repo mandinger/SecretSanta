@@ -17,6 +17,89 @@ if (typeof forge === 'undefined' || typeof CryptoJS === 'undefined') {
     throw new Error('Crypto libraries not loaded');
 }
 
+// ===== I18N UTILITIES =====
+
+window.__i18n = { lang: 'en', dict: {}, fallback: {} };
+
+function _lookupInDicts(key, dict) {
+    if (!dict) return null;
+    if (key in dict) return dict[key];
+    if (typeof key === 'string' && key.includes('.')) {
+        const parts = key.split('.');
+        const known = ['shared', 'index', 'room', 'blacklist'];
+        if (known.includes(parts[0])) {
+            const rest = parts.slice(1).join('.');
+            if (rest in dict) return dict[rest];
+        }
+    }
+    return null;
+}
+
+function _lookupI18n(key) {
+    const primary = window.__i18n.dict || {};
+    const fallback = window.__i18n.fallback || {};
+    return _lookupInDicts(key, primary) ?? _lookupInDicts(key, fallback);
+}
+
+// t(): returns translated string or the key as a fallback (for programmatic messages)
+function t(key, params) {
+    let out = _lookupI18n(key);
+    if (out == null) out = key;
+    if (params && typeof params === 'object') {
+        Object.keys(params).forEach(k => {
+            out = out.replace(new RegExp(`\\{${k}\\}`, 'g'), String(params[k]));
+        });
+    }
+    return out;
+}
+
+async function loadI18n() {
+    try {
+        const cfg = await fetch('/api/config').then(r => r.json()).catch(() => ({ lang: 'en' }));
+        window.__i18n.lang = cfg.lang || 'en';
+        const lang = window.__i18n.lang;
+        const primary = await fetch(`/locales/${lang}.json`).then(r => r.json());
+        const toFlat = (d) => (d.shared ? { ...d.shared, ...d.index, ...d.room, ...(d.blacklist || {}) } : d);
+        window.__i18n.dict = toFlat(primary);
+        if (lang !== 'en') {
+            try {
+                const en = await fetch(`/locales/en.json`).then(r => r.json());
+                window.__i18n.fallback = toFlat(en);
+            } catch { window.__i18n.fallback = {}; }
+        } else {
+            window.__i18n.fallback = {};
+        }
+    } catch (e) {
+        window.__i18n = { lang: 'en', dict: {}, fallback: {} };
+    }
+}
+
+function applyTranslations(root = document) {
+    const nodes = root.querySelectorAll('[data-i18n], [data-i18n-html], [data-i18n-placeholder]');
+    nodes.forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const keyHtml = el.getAttribute('data-i18n-html');
+        const keyPh = el.getAttribute('data-i18n-placeholder');
+        if (key) {
+            const val = _lookupI18n(key);
+            if (val != null) el.textContent = val;
+        }
+        if (keyHtml) {
+            const val = _lookupI18n(keyHtml);
+            if (val != null) el.innerHTML = val;
+        }
+        if (keyPh) {
+            const val = _lookupI18n(keyPh);
+            if (val != null) el.setAttribute('placeholder', val);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await loadI18n();
+    applyTranslations(document);
+});
+
 // ===== ENCRYPTION UTILITIES =====
 
 // Derive deterministic RSA keypair from user credentials
@@ -98,7 +181,7 @@ function delay(ms) {
 // Complete two-step registration with key generation
 async function registerUser(roomId, username, password, submitButton) {
     try {
-        setButtonState(submitButton, '📡 Requesting encryption parameters...', true);
+        setButtonState(submitButton, t('reg.requestingParams'), true);
         
         // Step 1: Get keySalt from server
         const initResponse = await fetch(`/api/rooms/${roomId}/init-register`, {
@@ -110,16 +193,16 @@ async function registerUser(roomId, username, password, submitButton) {
         const initData = await initResponse.json();
         if (!initResponse.ok) throw new Error(initData.error);
         
-        setButtonState(submitButton, '🔐 Generating encryption keys...', true);
+        setButtonState(submitButton, t('reg.generatingKeys'), true);
         await delay(100);
         
-        setButtonState(submitButton, '⚙️ Deriving keys (10-15 seconds)...', true);
+        setButtonState(submitButton, t('reg.derivingKeys'), true);
         
         // Step 2: Generate keypair (computationally intensive)
         const keypair = deriveKeyPairFromPassword(username, password, roomId, initData.keySalt);
         const publicKeyPem = exportPublicKey(keypair.publicKey);
         
-        setButtonState(submitButton, '📡 Completing registration...', true);
+        setButtonState(submitButton, t('reg.completing'), true);
         
         // Step 3: Complete registration
         const response = await fetch(`/api/rooms/${roomId}/register`, {
@@ -131,12 +214,12 @@ async function registerUser(roomId, username, password, submitButton) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error);
         
-        setButtonState(submitButton, '✅ Registration complete!', true);
+        setButtonState(submitButton, t('reg.complete'), true);
         await delay(500);
         
         return data;
     } finally {
-        setButtonState(submitButton, '✨ Register & Join', false);
+        setButtonState(submitButton, t('btn.registerJoin'), false);
     }
 }
 
@@ -145,7 +228,7 @@ async function registerUser(roomId, username, password, submitButton) {
 // Login and decrypt assignment
 async function loginAndDecrypt(roomId, username, password, submitButton) {
     try {
-        setButtonState(submitButton, '🔓 Authenticating...', true);
+        setButtonState(submitButton, t('login.authenticating'), true);
         
         const response = await fetch(`/api/rooms/${roomId}/login`, {
             method: 'POST',
@@ -156,27 +239,27 @@ async function loginAndDecrypt(roomId, username, password, submitButton) {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error);
         
-        setButtonState(submitButton, '🔐 Deriving decryption key...', true);
+        setButtonState(submitButton, t('login.derivingKey'), true);
         await delay(100);
         
         // Re-derive private key from password
         const keypair = deriveKeyPairFromPassword(username, password, roomId, data.keySalt);
         
-        setButtonState(submitButton, '🎁 Decrypting assignment (10-15 seconds)...', true);
+        setButtonState(submitButton, t('login.decrypting'), true);
         
         // Decrypt assignment
         const assignment = decryptWithPrivateKey(data.encryptedAssignment, keypair.privateKey);
         
         if (!assignment) {
-            throw new Error('Failed to decrypt. Check your password.');
+            throw new Error(t('decrypt.failed'));
         }
         
-        setButtonState(submitButton, '✅ Success!', true);
+        setButtonState(submitButton, t('success'), true);
         await delay(500);
         
-        return { username, assignment };
+        return { username, assignment, preferencesMap: data.preferencesMap };
     } finally {
-        setButtonState(submitButton, '🎁 View My Assignment', false);
+        setButtonState(submitButton, t('btn.viewAssignment'), false);
     }
 }
 

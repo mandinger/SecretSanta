@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -12,13 +13,14 @@ const BCRYPT_ROUNDS = 12;
 const app = express();
 const PORT = process.env.PORT || 8003;
 const BASE_URL = process.env.BASE_URL || 'http://localhost:8003';
+const APP_LANG = process.env.APP_LANG || 'en';
 
 // Persistent storage using JSON files
 const DATA_DIR = path.join(__dirname, 'data');
 const ROOMS_FILE = path.join(DATA_DIR, 'rooms.json');
 
 // In-memory storage for new system
-const rooms = new Map(); // roomId -> { id, name, hostUsername, hostLoginHash, participants: [{username, passwordHash, encryptedAssignment}], status: 'open'|'started', createdAt }
+const rooms = new Map(); // roomId -> { id, name, hostUsername, hostLoginHash, participants: [{username, passwordHash, publicKey, keySalt, encryptedAssignment, preferences}], status: 'open'|'started', createdAt, budget, instructions, blacklist: [{from, to}] }
 
 // Load data from files on startup
 async function loadData() {
@@ -121,6 +123,37 @@ function validateRoomName(name) {
   return sanitized;
 }
 
+function validatePreferences(prefs) {
+  // Store as simple text (no HTML), limit length
+  return sanitizeString(String(prefs || ''), 1000);
+}
+
+function validateBudget(budget) {
+  return sanitizeString(String(budget || ''), 100);
+}
+
+function validateInstructions(instr) {
+  return sanitizeString(String(instr || ''), 2000);
+}
+
+function sanitizeNameLoose(name) {
+  return sanitizeString(String(name || ''), 50).toLowerCase();
+}
+
+function validateBlacklist(blacklist) {
+  if (!Array.isArray(blacklist)) return [];
+  const cleaned = [];
+  for (const item of blacklist) {
+    if (!item || typeof item !== 'object') continue;
+    const from = sanitizeNameLoose(item.from);
+    const to = sanitizeNameLoose(item.to);
+    if (from && to && from !== to) {
+      cleaned.push({ from, to });
+    }
+  }
+  return cleaned.slice(0, 200); // avoid extreme sizes
+}
+
 // Rate limiting (simple in-memory)
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
@@ -149,6 +182,80 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// App config (for client to know language, etc.)
+app.get('/api/config', (req, res) => {
+  res.json({ lang: APP_LANG });
+});
+
+// Update room blacklist (host only)
+app.post('/api/rooms/:id/blacklist', async (req, res) => {
+  try {
+    const { hostUsername, hostPassword, blacklist } = req.body;
+    const roomId = req.params.id;
+
+    if (!hostUsername || !hostPassword) {
+      return res.status(400).json({ error: 'Host username and password are required' });
+    }
+
+    const room = rooms.get(roomId);
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    const loginHash = hostUsername + hostPassword;
+    if (!(await verifyPassword(loginHash, room.hostLoginHash))) {
+      return res.status(401).json({ error: 'Invalid host credentials' });
+    }
+
+    room.blacklist = validateBlacklist(blacklist);
+    await saveData();
+
+    res.json({ success: true, blacklist: room.blacklist });
+  } catch (error) {
+    console.error('Error updating blacklist:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Save or update participant preferences
+app.post('/api/rooms/:id/preferences', async (req, res) => {
+  try {
+    const clientId = req.ip || req.connection.remoteAddress;
+    if (isRateLimited(clientId)) {
+      return res.status(429).json({ error: 'Too many requests. Please wait a minute.' });
+    }
+
+    const { username, password, preferences } = req.body;
+    const roomId = req.params.id;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    const room = rooms.get(roomId);
+    if (!room) {
+      return res.status(404).json({ error: 'Room not found' });
+    }
+
+    const sanitizedUsername = validateUsername(username);
+    validatePassword(password);
+    const participant = room.participants.find(p => p.username === sanitizedUsername);
+    if (!participant) {
+      return res.status(404).json({ error: 'User not found in this room' });
+    }
+
+    if (!(await verifyPassword(password, participant.passwordHash))) {
+      return res.status(401).json({ error: 'Invalid password' });
+    }
+
+    participant.preferences = validatePreferences(preferences);
+    await saveData();
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error saving preferences:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Create a new room
 app.post('/api/rooms', async (req, res) => {
   try {
@@ -157,7 +264,7 @@ app.post('/api/rooms', async (req, res) => {
       return res.status(429).json({ error: 'Too many requests. Please wait a minute.' });
     }
 
-    const { name, hostUsername, hostPassword, autoJoinHost } = req.body;
+    const { name, hostUsername, hostPassword, autoJoinHost, budget, instructions, blacklist } = req.body;
     
     if (!name || !hostUsername || !hostPassword) {
       return res.status(400).json({ error: 'Room name, host username, and password are required' });
@@ -178,7 +285,10 @@ app.post('/api/rooms', async (req, res) => {
       hostLoginHash: hostLoginHash,
       participants: [],
       status: 'open',
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      budget: validateBudget(budget),
+      instructions: validateInstructions(instructions),
+      blacklist: validateBlacklist(blacklist)
     };
 
     rooms.set(roomId, room);
@@ -212,7 +322,10 @@ app.get('/api/rooms/:id', (req, res) => {
     id: room.id,
     name: room.name,
     participantCount: room.participants.length,
-    status: room.status
+    status: room.status,
+    budget: room.budget || '',
+    instructions: room.instructions || '',
+    blacklist: Array.isArray(room.blacklist) ? room.blacklist : []
   });
 });
 
@@ -424,7 +537,10 @@ app.post('/api/rooms/:id/host-auth', async (req, res) => {
         hasAssignment: !!p.encryptedAssignment
       })),
       status: room.status,
-      createdAt: room.createdAt
+      createdAt: room.createdAt,
+      budget: room.budget || '',
+      instructions: room.instructions || '',
+      blacklist: Array.isArray(room.blacklist) ? room.blacklist : []
     });
   } catch (error) {
     console.error('Error authenticating host:', error);
@@ -447,8 +563,8 @@ app.post('/api/rooms/:id/remove-participant', async (req, res) => {
       return res.status(404).json({ error: 'Room not found' });
     }
 
-    const loginHash = hashPassword(hostUsername + hostPassword);
-    if (loginHash !== room.hostLoginHash) {
+    const loginHash = hostUsername + hostPassword;
+    if (!(await verifyPassword(loginHash, room.hostLoginHash))) {
       return res.status(401).json({ error: 'Invalid host credentials' });
     }
 
@@ -512,8 +628,16 @@ app.post('/api/rooms/:id/start', async (req, res) => {
       });
     }
 
+    // Prepare blacklist matcher for generator
+    const bl = Array.isArray(room.blacklist) ? room.blacklist : [];
+    const isPairBlacklisted = (giver, receiver) => {
+      const g = sanitizeNameLoose(giver);
+      const r = sanitizeNameLoose(receiver);
+      return bl.some(rule => rule.from === g && rule.to === r);
+    };
+
     // Generate assignments on server
-    const assignments = generateSecretSantaAssignments(room.participants);
+    const assignments = generateSecretSantaAssignments(room.participants, isPairBlacklisted);
 
     // Encrypt each assignment with participant's public key
     const encryptedAssignments = assignments.map(assignment => {
@@ -568,11 +692,11 @@ app.post('/api/rooms/:id/start', async (req, res) => {
 });
 
 // Helper function to generate Secret Santa assignments
-function generateSecretSantaAssignments(participants) {
+function generateSecretSantaAssignments(participants, isBlacklistedFn) {
   const usernames = participants.map(p => p.username);
   let assignments = [];
   let attempts = 0;
-  const maxAttempts = 100;
+  const maxAttempts = 1000;
 
   while (attempts < maxAttempts) {
     assignments = [];
@@ -584,6 +708,12 @@ function generateSecretSantaAssignments(participants) {
       const receiver = shuffled[i];
 
       if (giver === receiver) {
+        valid = false;
+        break;
+      }
+
+      // Check room-level blacklist if available on participants array via closure captured from start endpoint
+      if (typeof isBlacklistedFn === 'function' && isBlacklistedFn(giver, receiver)) {
         valid = false;
         break;
       }
@@ -635,12 +765,21 @@ app.post('/api/rooms/:id/login', async (req, res) => {
       });
     }
 
+    // Build preferences map for started rooms so users can see recipient preferences
+    let preferencesMap = undefined;
+    if (room.status === 'started') {
+      preferencesMap = Object.fromEntries(
+        room.participants.map(p => [p.username, p.preferences || ''])
+      );
+    }
+
     res.json({
       success: true,
       username: participant.username,
       roomName: room.name,
       keySalt: participant.keySalt,
-      encryptedAssignment: participant.encryptedAssignment
+      encryptedAssignment: participant.encryptedAssignment,
+      preferencesMap
     });
   } catch (error) {
     console.error('Error logging in participant:', error);

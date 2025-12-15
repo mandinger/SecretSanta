@@ -111,3 +111,11 @@ body {
         opacity: 1;
     }
 }
+
+/* ===== PREFERENCES CONTENT ===== */
+#recipientPreferences img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 0.5rem;
+}
