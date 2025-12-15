@@ -1,14 +1,13 @@
-version: '3.8'
-
 services:
   secret-santa:
     build: .
     ports:
-      - "8003:8003"
+      - "8004:8004"
     environment:
       - NODE_ENV=production
-      - PORT=8003
+      - PORT=8004
       - BASE_URL=${BASE_URL}
+      - APP_LANG=${APP_LANG}
     restart: unless-stopped
     container_name: secret-santa-app
     volumes:
